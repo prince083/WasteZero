@@ -11,6 +11,16 @@ const OpportunityService = {
         }
     },
 
+    // Get a single opportunity by ID
+    getOpportunityById: async (opportunityId) => {
+        try {
+            const response = await api.get(`/opportunities/${opportunityId}`);
+            return response.data.opportunity || response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch opportunity details';
+        }
+    },
+
     // Get opportunities created by current NGO user
     getMyOpportunities: async () => {
         try {

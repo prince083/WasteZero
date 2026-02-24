@@ -6,9 +6,14 @@ const { validate, opportunitySchema } = require('../middlewares/validation');
 const {
     createOpportunity,
     getOpportunities,
+    getOpportunityById,
     getMyOpportunities,
     updateOpportunity,
-    deleteOpportunity
+    deleteOpportunity,
+    applyToOpportunity,
+    getAppliedOpportunities,
+    getOpportunityApplicants,
+    searchOpportunities
 } = require('../controllers/opportunityController');
 
 // Protect all routes
@@ -24,6 +29,19 @@ router.post(
 
 // Get All Opportunities (Available to all authenticated users)
 router.get('/', getOpportunities);
+
+// Get single opportunity by ID
+router.get('/:id', getOpportunityById);
+
+// Search Opportunities (All)
+router.get('/search', searchOpportunities);
+
+// Get Applied Opportunities (Volunteer only)
+router.get(
+    '/applied',
+    authorizeRoles('volunteer'),
+    getAppliedOpportunities
+);
 
 // Get My Opportunities (NGO/Admin only)
 router.get(
@@ -44,6 +62,20 @@ router.delete(
     '/:id',
     authorizeRoles('ngo', 'admin'),
     deleteOpportunity
+);
+
+// Apply for Opportunity (Volunteer only)
+router.post(
+    '/:id/apply',
+    authorizeRoles('volunteer'),
+    applyToOpportunity
+);
+
+// Get Applicants for Opportunity (NGO/Admin only)
+router.get(
+    '/:id/applicants',
+    authorizeRoles('ngo', 'admin'),
+    getOpportunityApplicants
 );
 
 module.exports = router;
