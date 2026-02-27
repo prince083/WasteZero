@@ -21,17 +21,28 @@ function Register() {
   });
   const [otp, setOtp] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [locationMode, setLocationMode] = useState("manual");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleLocationSelect = (lat, lng) => {
+  const handleLocationSelect = async (lat, lng) => {
     setFormData((prev) => ({
       ...prev,
       latitude: lat.toFixed(6),
       longitude: lng.toFixed(6),
     }));
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await response.json();
+      if (data && data.display_name) {
+        setFormData(prev => ({ ...prev, address: data.display_name }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch address:", error);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -147,50 +158,63 @@ function Register() {
             }}
           ></textarea>
 
-          <div className="full-width">
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              Select Location on Map:
-            </label>
-            <MapPicker
-              onLocationSelect={handleLocationSelect}
-              initialLat={formData.latitude}
-              initialLng={formData.longitude}
-            />
-          </div>
+          <div className="full-width" style={{ marginBottom: "15px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5px" }}>
+              <label style={{ margin: 0, fontWeight: "bold" }}>Address Details:</label>
+              <div style={{ display: "flex", gap: "5px" }}>
+                <button
+                  type="button"
+                  onClick={() => setLocationMode("manual")}
+                  style={{
+                    padding: "4px 10px",
+                    fontSize: "12px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    backgroundColor: locationMode === "manual" ? "#4CAF50" : "#f1f1f1",
+                    color: locationMode === "manual" ? "white" : "black",
+                    cursor: "pointer"
+                  }}
+                >
+                  Type Manual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocationMode("map")}
+                  style={{
+                    padding: "4px 10px",
+                    fontSize: "12px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    backgroundColor: locationMode === "map" ? "#4CAF50" : "#f1f1f1",
+                    color: locationMode === "map" ? "white" : "black",
+                    cursor: "pointer"
+                  }}
+                >
+                  Pick on Map
+                </button>
+              </div>
+            </div>
 
-          <div className="full-width">
             <input
               type="text"
               name="address"
-              placeholder="Full Address"
+              placeholder={locationMode === "map" ? "Pin location on map or edit here" : "Enter your Full Address"}
               value={formData.address}
               onChange={handleChange}
               required
+              style={{ marginTop: "10px", marginBottom: "15px" }}
             />
-          </div>
 
-          <div
-            className="full-width"
-            style={{ display: "flex", gap: "10px" }}
-          >
-            <input
-              type="number"
-              name="latitude"
-              placeholder="Latitude"
-              value={formData.latitude}
-              onChange={handleChange}
-              step="any"
-              style={{ flex: 1 }}
-            />
-            <input
-              type="number"
-              name="longitude"
-              placeholder="Longitude"
-              value={formData.longitude}
-              onChange={handleChange}
-              step="any"
-              style={{ flex: 1 }}
-            />
+            {locationMode === "map" && (
+              <div style={{ marginTop: "10px", marginBottom: "15px" }}>
+                <p style={{ fontSize: "12px", color: "gray", marginBottom: "10px" }}>Click on the map to pin your location. The address will fill automatically.</p>
+                <MapPicker
+                  onLocationSelect={handleLocationSelect}
+                  initialLat={formData.latitude}
+                  initialLng={formData.longitude}
+                />
+              </div>
+            )}
           </div>
 
           {showOtpInput && (
