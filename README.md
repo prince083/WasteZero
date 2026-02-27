@@ -38,6 +38,9 @@ The backend runs on **Node.js + Express** with **MongoDB**.
    # Email Service (Required for OTP)
    EMAIL_USER=your_email@gmail.com
    EMAIL_PASS=your_email_app_password
+
+   # Admin Access
+   ADMIN_SECURITY_CODE=your_secret_admin_code_here # Required to register an 'admin' role
    ```
    > **Note:** For Gmail, use an **App Password** if 2-Step Verification is enabled.
    
