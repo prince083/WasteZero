@@ -23,7 +23,8 @@ const Sidebar = () => {
     const menuItems = [
         { name: 'Dashboard', icon: <FaThLarge />, path: '/dashboard' },
         { name: 'Schedule Pickup', icon: <FaCalendarAlt />, path: '/schedule-pickup' },
-        { name: 'Opportunities', icon: <FaLightbulb />, path: '/opportunities' },
+        // Hide Opportunities from Admin
+        ...(user?.role !== 'admin' ? [{ name: 'Opportunities', icon: <FaLightbulb />, path: '/opportunities' }] : []),
         { name: 'Messages', icon: <FaEnvelope />, path: '/messages' },
         { name: 'My Impact', icon: <FaChartLine />, path: '/impact' },
     ];
