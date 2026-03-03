@@ -74,6 +74,7 @@ async function login(req, res) {
 
     try {
       await sendVerificationEmail(email, otp, 'Your Login OTP');
+
       return res.status(200).json({ message: 'OTP sent to your email.', email: email });
     } catch (emailError) {
       return res.status(500).json({ message: 'Failed to send OTP email.' });
@@ -105,6 +106,7 @@ async function verifyOTP(req, res) {
     user.isVerified = true;
     user.otp = undefined;
     user.otpExpires = undefined;
+
     await user.save();
 
     const payload = { id: user._id, role: user.role };

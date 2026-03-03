@@ -32,4 +32,4 @@ MessageSchema.statics.getRoomId = function (userId1, userId2) {
     return [userId1.toString(), userId2.toString()].sort().join('_');
 };
 
-module.exports = mongoose.model('Message', MessageSchema);
+module.exports = mongoose.models.Message || mongoose.model('Message', MessageSchema);

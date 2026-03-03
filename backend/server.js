@@ -23,6 +23,7 @@ async function start() {
   app.use('/api/opportunities', require('./routes/opportunities'));
   app.use('/api/matches', require('./routes/matches'));
   app.use('/api/chat', require('./routes/chat'));
+  app.use('/api/notifications', require('./routes/notification'));
 
   app.get('/', (req, res) => {
     res.send('WasteZero Backend is running');
@@ -43,7 +44,7 @@ async function start() {
   // Initialize all socket event handlers
   initSocket(io);
 
-  // Start the HTTP server (not app.listen — socket.io needs the http server)
+  // Start the HTTP server
   server.listen(port, () => {
     console.log(`Server running on port ${port}`);
     console.log(`Socket.io ready`);
