@@ -46,3 +46,5 @@ tmp/
 # Ignore PDF files
 *.pdf
 
+# Personal AI working guide (local only, do not push)
+MASTER_PROMPT.txt

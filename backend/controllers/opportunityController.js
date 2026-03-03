@@ -3,7 +3,7 @@ const Application = require('../models/Application');
 const createOpportunity = async (req, res, next) => {
     try {
 
-        const { title, description, required_skills, duration, location, address } = req.body;
+        const { title, description, required_skills, duration, location, address, status } = req.body;
 
         const opportunity = await Opportunity.create({
             ngo_id: req.user.id,
@@ -12,7 +12,8 @@ const createOpportunity = async (req, res, next) => {
             required_skills,
             duration,
             location,
-            address
+            address,
+            status
         });
 
         res.status(201).json({
