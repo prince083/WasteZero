@@ -13,6 +13,7 @@ const {
     applyToOpportunity,
     getAppliedOpportunities,
     getOpportunityApplicants,
+    updateApplicationStatus,
     searchOpportunities
 } = require('../controllers/opportunityController');
 // Search Opportunities (All)
@@ -75,6 +76,13 @@ router.post(
     '/:id/apply',
     authorizeRoles('volunteer'),
     applyToOpportunity
+);
+
+// Accept or Reject an applicant (NGO only)
+router.patch(
+    '/:opportunityId/applicants/:applicationId',
+    authorizeRoles('ngo', 'admin'),
+    updateApplicationStatus
 );
 
 

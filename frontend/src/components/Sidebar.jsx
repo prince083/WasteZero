@@ -22,7 +22,10 @@ const Sidebar = () => {
 
     const menuItems = [
         { name: 'Dashboard', icon: <FaThLarge />, path: '/dashboard' },
-        { name: 'Schedule Pickup', icon: <FaCalendarAlt />, path: '/schedule-pickup' },
+        // Volunteers can schedule pickups
+        ...(user?.role === 'volunteer' ? [{ name: 'Schedule Pickup', icon: <FaCalendarAlt />, path: '/schedule-pickup' }] : []),
+        // NGOs see pickups assigned to them
+        ...(user?.role === 'ngo' ? [{ name: 'Assigned Pickups', icon: <FaCalendarAlt />, path: '/assigned-pickups' }] : []),
         // Hide Opportunities from Admin
         ...(user?.role !== 'admin' ? [{ name: 'Opportunities', icon: <FaLightbulb />, path: '/opportunities' }] : []),
         { name: 'Messages', icon: <FaEnvelope />, path: '/messages' },

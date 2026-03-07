@@ -57,6 +57,12 @@ const UserSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+    // account status — admin can suspend users
+    status: {
+        type: String,
+        enum: ['active', 'suspended'],
+        default: 'active'
     }
 }, { timestamps: true });
 

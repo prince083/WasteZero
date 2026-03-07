@@ -1,5 +1,6 @@
 const Opportunity = require('../models/Opportunity');
 const Application = require('../models/Application');
+const Notification = require('../models/Notification');
 const createOpportunity = async (req, res, next) => {
     try {
 
@@ -259,6 +260,80 @@ const searchOpportunities = async (req, res, next) => {
     }
 };
 
+// ─────────────────────────────────────────────────────────────
+// PATCH /api/opportunities/:opportunityId/applicants/:applicationId
+// NGO accepts or rejects a volunteer's application
+// Triggers: DB Notification + real-time Socket.io push to volunteer
+// ─────────────────────────────────────────────────────────────
+const updateApplicationStatus = async (req, res, next) => {
+    try {
+        const { opportunityId, applicationId } = req.params;
+        const { status } = req.body;  // 'accepted' or 'rejected'
+
+        if (!['accepted', 'rejected'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Status must be "accepted" or "rejected"'
+            });
+        }
+
+        // Verify NGO owns this opportunity
+        const opportunity = await Opportunity.findById(opportunityId);
+        if (!opportunity) {
+            return res.status(404).json({ success: false, message: 'Opportunity not found' });
+        }
+        if (opportunity.ngo_id.toString() !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Update the application status
+        const application = await Application.findByIdAndUpdate(
+            applicationId,
+            { status },
+            { new: true }
+        ).populate('volunteer_id', 'name email');
+
+        if (!application) {
+            return res.status(404).json({ success: false, message: 'Application not found' });
+        }
+
+        // Save persistent notification for volunteer
+        await Notification.create({
+            user_id: application.volunteer_id._id,
+            type: 'general',
+            message: status === 'accepted'
+                ? `🎉 Congratulations! Your application for "${opportunity.title}" has been accepted.`
+                : `Your application for "${opportunity.title}" was not selected this time.`,
+            link: `/opportunities/${opportunityId}`
+        });
+
+        // Push real-time notification via Socket.io if volunteer is online
+        const io = req.app.get('io');
+        const onlineUsers = req.app.get('onlineUsers');
+        if (io && onlineUsers) {
+            const volunteerSocketId = onlineUsers.get(application.volunteer_id._id.toString());
+            if (volunteerSocketId) {
+                io.to(volunteerSocketId).emit('new_notification', {
+                    type: 'general',
+                    message: status === 'accepted'
+                        ? `🎉 Your application for "${opportunity.title}" was accepted!`
+                        : `Your application for "${opportunity.title}" was not selected.`,
+                    link: `/opportunities/${opportunityId}`
+                });
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Application ${status} successfully`,
+            data: application
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     createOpportunity,
     getOpportunities,
@@ -269,5 +344,6 @@ module.exports = {
     applyToOpportunity,
     getAppliedOpportunities,
     getOpportunityApplicants,
+    updateApplicationStatus,
     searchOpportunities
 };

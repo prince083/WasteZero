@@ -113,6 +113,9 @@ function initSocket(io) {
             console.log(`[Socket] Client disconnected: ${socket.id}`);
         });
     });
+
+    // Return the shared map so server.js can expose it via app.set()
+    return onlineUsers;
 }
 
-module.exports = { initSocket };
+module.exports = { initSocket, onlineUsers };

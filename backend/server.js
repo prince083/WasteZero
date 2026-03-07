@@ -24,6 +24,7 @@ async function start() {
   app.use('/api/matches', require('./routes/matches'));
   app.use('/api/chat', require('./routes/chat'));
   app.use('/api/notifications', require('./routes/notification'));
+  app.use('/api/pickups', require('./routes/pickups'));
 
   app.get('/', (req, res) => {
     res.send('WasteZero Backend is running');
@@ -42,7 +43,12 @@ async function start() {
   });
 
   // Initialize all socket event handlers
-  initSocket(io);
+  const onlineUsers = initSocket(io);
+
+  // Expose io + onlineUsers so controllers can push real-time events
+  // Usage in any controller: req.app.get('io'), req.app.get('onlineUsers')
+  app.set('io', io);
+  app.set('onlineUsers', onlineUsers);
 
   // Start the HTTP server
   server.listen(port, () => {
