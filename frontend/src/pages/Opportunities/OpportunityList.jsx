@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaCommentDots } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import opportunityService from '../../services/opportunityService';
@@ -9,6 +10,7 @@ import Navbar from '../../components/Navbar';
 const OpportunityList = () => {
     const { user } = useAuth();
     const { isDarkMode } = useTheme();
+    const navigate = useNavigate();
     const [opportunities, setOpportunities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -73,6 +75,14 @@ const OpportunityList = () => {
                 alert(err.message || 'Failed to delete opportunity');
             }
         }
+    };
+
+    const handleChatWithNGO = (ngoData) => {
+        if (!user || !ngoData) return;
+        // ngoData could be an object if populated, or string ID
+        const ngoId = ngoData._id || ngoData;
+        const roomId = [user._id, ngoId].sort().join('_');
+        navigate(`/chat/${roomId}`);
     };
 
     const filteredOpportunities = opportunities.filter(opp => {
@@ -194,22 +204,7 @@ const OpportunityList = () => {
                                                     <h2 className={`text-xl font-bold line-clamp-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                                         {opportunity.title}
                                                     </h2>
-                                                    {(user?.role === 'ngo' || user?.role === 'admin') && (opportunity.ngo_id === user?.id || user?.role === 'admin') && (
-                                                        <div className="flex gap-3 mt-1">
-                                                            <Link
-                                                                to={`/opportunities/edit/${opportunity._id}`}
-                                                                className="text-xs font-semibold text-blue-500 hover:text-blue-600 transition-colors"
-                                                            >
-                                                                Edit
-                                                            </Link>
-                                                            <button
-                                                                onClick={() => handleDelete(opportunity._id)}
-                                                                className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors"
-                                                            >
-                                                                Delete
-                                                            </button>
-                                                        </div>
-                                                    )}
+
                                                 </div>
                                                 <span
                                                     className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap ml-2 ${opportunity.status === 'open'
@@ -265,82 +260,14 @@ const OpportunityList = () => {
                                             </div>
                                         </div>
 
-                                        {/* Footer - Apply Button */}
+                                        {/* Footer - View Details Button */}
                                         <div className={`px-6 py-4 border-t ${isDarkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
-                                            {user?.role === 'volunteer' ? (
-                                                <button
-                                                    onClick={() => handleApply(opportunity._id)}
-                                                    disabled={
-                                                        applyingId === opportunity._id ||
-                                                        appliedOpportunities.has(opportunity._id) ||
-                                                        opportunity.status !== 'open'
-                                                    }
-                                                    className={`w-full py-2.5 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${appliedOpportunities.has(opportunity._id)
-                                                        ? 'bg-green-100 text-green-700 cursor-not-allowed border border-green-300'
-                                                        : opportunity.status !== 'open'
-                                                            ? 'bg-gray-300 text-gray-600 cursor-not-allowed text-center flex justify-center items-center'
-                                                            : applyingId === opportunity._id
-                                                                ? 'bg-green-600 text-white cursor-wait opacity-90'
-                                                                : 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800'
-                                                        }`}
-                                                >
-                                                    {applyingId === opportunity._id ? (
-                                                        <span className="flex items-center justify-center">
-                                                            <svg
-                                                                className="animate-spin h-4 w-4 mr-2"
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                fill="none"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <circle
-                                                                    className="opacity-25"
-                                                                    cx="12"
-                                                                    cy="12"
-                                                                    r="10"
-                                                                    stroke="currentColor"
-                                                                    strokeWidth="4"
-                                                                ></circle>
-                                                                <path
-                                                                    className="opacity-75"
-                                                                    fill="currentColor"
-                                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                                ></path>
-                                                            </svg>
-                                                            Applying...
-                                                        </span>
-                                                    ) : appliedOpportunities.has(opportunity._id) ? (
-                                                        <span className="flex items-center justify-center">
-                                                            <svg
-                                                                className="w-4 h-4 mr-2"
-                                                                fill="currentColor"
-                                                                viewBox="0 0 20 20"
-                                                            >
-                                                                <path
-                                                                    fillRule="evenodd"
-                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                    clipRule="evenodd"
-                                                                />
-                                                            </svg>
-                                                            Already Applied
-                                                        </span>
-                                                    ) : opportunity.status !== 'open' ? (
-                                                        'Opportunity Closed'
-                                                    ) : (
-                                                        'Apply Now'
-                                                    )}
-                                                </button>
-                                            ) : user?.role === 'ngo' ? (
-                                                <div className={`text-center text-sm py-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                    <p>NGOs cannot apply for opportunities</p>
-                                                </div>
-                                            ) : (
-                                                <a
-                                                    href="/login"
-                                                    className="block w-full py-2.5 px-4 rounded-lg font-semibold bg-green-600 text-white hover:bg-green-700 text-center transition-colors text-sm"
-                                                >
-                                                    Login to Apply
-                                                </a>
-                                            )}
+                                            <Link
+                                                to={`/opportunities/${opportunity._id}`}
+                                                className="block w-full py-2.5 px-4 rounded-lg font-semibold bg-green-600 text-white hover:bg-green-700 text-center transition-colors text-sm"
+                                            >
+                                                View Details
+                                            </Link>
                                         </div>
                                     </div>
                                 ))}

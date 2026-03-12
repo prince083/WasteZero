@@ -6,19 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
 const Profile = () => {
-    const { user, setUser } = useAuth(); // Assuming setUser is exposed or we need to update context
+    const { user, setUser } = useAuth();
     const { isDarkMode } = useTheme();
-    // Actually AuthContext exposes setUser via verifyOtp/login but maybe not directly? 
-    // Let's check AuthContext again. It exposes user, login, register, verifyOtp, logout.
-    // It does NOT expose setUser directly.
-    // However, when we update profile, we need to update the global user state.
-    // We should probably expose a method `updateUser` in AuthContext or just rely on re-fetching?
-    // For now, let's just read `user` from context. 
-    // And for `setFormData`, we use `user`.
-
-    // Wait, if I update profile, I need the UI to reflect changes (like name in sidebar).
-    // So AuthContext needs a way to update the user.
-    // Let's assume for this step I just read it. I might need to add `updateUser` to context later.
 
     const [activeTab, setActiveTab] = useState("profile");
     const [formData, setFormData] = useState({
