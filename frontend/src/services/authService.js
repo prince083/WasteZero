@@ -19,6 +19,12 @@ const AuthService = {
         return response.data;
     },
 
+    // Verify Admin Code
+    verifyAdminCode: async (data) => {
+        const response = await api.post('/auth/verify-admin-code', data);
+        return response.data;
+    },
+
     // Get current user profile (example)
     getProfile: async () => {
         const response = await api.get('/auth/profile'); // Adjust endpoint

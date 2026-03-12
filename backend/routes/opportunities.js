@@ -13,9 +13,11 @@ const {
     applyToOpportunity,
     getAppliedOpportunities,
     getOpportunityApplicants,
+    updateApplicationStatus,
     searchOpportunities
 } = require('../controllers/opportunityController');
-
+// Search Opportunities (All)
+router.get('/search', searchOpportunities);
 // Protect all routes
 router.use(auth);
 
@@ -30,11 +32,13 @@ router.post(
 // Get All Opportunities (Available to all authenticated users)
 router.get('/', getOpportunities);
 
-// Get single opportunity by ID
-router.get('/:id', getOpportunityById);
+// Get My Opportunities (NGO/Admin only)
+router.get(
+    '/my',
+    authorizeRoles('ngo', 'admin'),
+    getMyOpportunities
+);
 
-// Search Opportunities (All)
-router.get('/search', searchOpportunities);
 
 // Get Applied Opportunities (Volunteer only)
 router.get(
@@ -43,13 +47,16 @@ router.get(
     getAppliedOpportunities
 );
 
-// Get My Opportunities (NGO/Admin only)
-router.get(
-    '/my',
-    authorizeRoles('ngo', 'admin'),
-    getMyOpportunities
-);
 
+
+// Get Applicants for Opportunity (NGO/Admin only)
+router.get(
+    '/:id/applicants',
+    authorizeRoles('ngo', 'admin'),
+    getOpportunityApplicants
+);
+// Get single opportunity by ID
+router.get('/:id', getOpportunityById);
 // Update Opportunity (NGO/Admin only)
 router.put(
     '/:id',
@@ -71,11 +78,13 @@ router.post(
     applyToOpportunity
 );
 
-// Get Applicants for Opportunity (NGO/Admin only)
-router.get(
-    '/:id/applicants',
+// Accept or Reject an applicant (NGO only)
+router.patch(
+    '/:opportunityId/applicants/:applicationId',
     authorizeRoles('ngo', 'admin'),
-    getOpportunityApplicants
+    updateApplicationStatus
 );
+
+
 
 module.exports = router;

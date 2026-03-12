@@ -18,12 +18,14 @@ const OpportunityForm = () => {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [skillInput, setSkillInput] = useState('');
+    const [locationMode, setLocationMode] = useState('manual');
 
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         required_skills: [],
         duration: '',
+        date: '',
         address: '',
         status: 'open',
         location: {
@@ -42,6 +44,7 @@ const OpportunityForm = () => {
                         description: data.description || '',
                         required_skills: data.required_skills || [],
                         duration: data.duration || '',
+                        date: data.date || '',
                         address: data.address || '',
                         status: data.status || 'open',
                         location: data.location || { type: 'Point', coordinates: [0, 0] }
@@ -64,7 +67,7 @@ const OpportunityForm = () => {
         }));
     };
 
-    const handleLocationSelect = (lat, lng) => {
+    const handleLocationSelect = async (lat, lng) => {
         setFormData(prev => ({
             ...prev,
             location: {
@@ -72,6 +75,16 @@ const OpportunityForm = () => {
                 coordinates: [lng, lat]
             }
         }));
+
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await response.json();
+            if (data && data.display_name) {
+                setFormData(prev => ({ ...prev, address: data.display_name }));
+            }
+        } catch (error) {
+            console.error("Failed to fetch address from map selection:", error);
+        }
     };
 
     const handleAddSkill = (e) => {
@@ -183,6 +196,17 @@ const OpportunityForm = () => {
                                         </div>
 
                                         <div>
+                                            <label className="block text-sm font-medium mb-2">Date</label>
+                                            <input
+                                                type="date"
+                                                name="date"
+                                                value={formData.date}
+                                                onChange={handleInputChange}
+                                                className={`w-full p-3 rounded-xl border focus:ring-2 focus:ring-green-500 outline-none transition-all ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-200'}`}
+                                            />
+                                        </div>
+
+                                        <div>
                                             <label className="block text-sm font-medium mb-2">Status</label>
                                             <select
                                                 name="status"
@@ -229,7 +253,25 @@ const OpportunityForm = () => {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium mb-2">Address</label>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <label className="block text-sm font-medium">Address</label>
+                                                <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setLocationMode('manual')}
+                                                        className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${locationMode === 'manual' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
+                                                    >
+                                                        Manual
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setLocationMode('map')}
+                                                        className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${locationMode === 'map' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}
+                                                    >
+                                                        From Map
+                                                    </button>
+                                                </div>
+                                            </div>
                                             <input
                                                 type="text"
                                                 name="address"
@@ -237,8 +279,20 @@ const OpportunityForm = () => {
                                                 onChange={handleInputChange}
                                                 required
                                                 className={`w-full p-3 rounded-xl border focus:ring-2 focus:ring-green-500 outline-none transition-all ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-200'}`}
-                                                placeholder="Full street address"
+                                                placeholder={locationMode === 'map' ? 'Select on map below or edit here' : 'Full street address'}
                                             />
+                                            {locationMode === 'map' && (
+                                                <div className="mt-4">
+                                                    <p className="text-xs opacity-60 mb-2">Click on the map to pin the location. The address will update automatically.</p>
+                                                    <div className="h-[250px] rounded-xl overflow-hidden border border-opacity-10 border-gray-500">
+                                                        <MapPicker
+                                                            onLocationSelect={handleLocationSelect}
+                                                            initialLat={formData.location.coordinates[1]}
+                                                            initialLng={formData.location.coordinates[0]}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -257,31 +311,6 @@ const OpportunityForm = () => {
                                 </div>
                             </div>
 
-                            <div className={`p-6 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
-                                <h3 className="text-lg font-semibold mb-4">Location Map</h3>
-                                <p className="text-sm opacity-60 mb-4">Click on the map to pin the exact location of the opportunity.</p>
-                                <div className="h-[300px] rounded-xl overflow-hidden border border-opacity-10 border-gray-500">
-                                    <MapPicker
-                                        onLocationSelect={handleLocationSelect}
-                                        initialLat={formData.location.coordinates[1]}
-                                        initialLng={formData.location.coordinates[0]}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                    <div>
-                                        <label className="text-xs font-medium opacity-50">Latitude</label>
-                                        <div className="p-2 rounded-lg bg-gray-500 bg-opacity-5 text-sm">
-                                            {formData.location.coordinates[1].toFixed(6)}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium opacity-50">Longitude</label>
-                                        <div className="p-2 rounded-lg bg-gray-500 bg-opacity-5 text-sm">
-                                            {formData.location.coordinates[0].toFixed(6)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div className="flex gap-4 justify-end">
                                 <button

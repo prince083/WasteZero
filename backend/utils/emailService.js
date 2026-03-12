@@ -15,9 +15,9 @@ async function sendVerificationEmail(email, otp, subject) {
         subject: subject,
         text: `Your OTP verification code is: ${otp}. This code is valid for 10 minutes.`
     };
-
     try {
         await transporter.sendMail(mailOptions);
+
         console.log(`Email sent to ${email}`);
     } catch (error) {
         console.error("Error sending email:", error);

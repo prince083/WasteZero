@@ -7,5 +7,6 @@ const { validate, registerSchema, loginSchema } = require('../middlewares/valida
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/verify-otp', authController.verifyOTP);
+router.post('/verify-admin-code', authController.verifyAdminCode);
 
 module.exports = router;

@@ -4,6 +4,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import MapPicker from "../components/MapPicker";
 import { useAuth } from "../context/AuthContext";
 
+import AuthService from "../services/authService";
+
 function Register() {
   const navigate = useNavigate();
   const { register, verifyOtp } = useAuth();
@@ -12,7 +14,9 @@ function Register() {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "",
+    securityCode: "",
     skills: "",
     bio: "",
     latitude: "",
@@ -21,21 +25,59 @@ function Register() {
   });
   const [otp, setOtp] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [locationMode, setLocationMode] = useState("manual");
+  const [isAdminVerified, setIsAdminVerified] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
   const handleChange = (e) => {
+    if (e.target.name === 'role') {
+      setIsAdminVerified(false);
+    }
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleLocationSelect = (lat, lng) => {
+  const handleLocationSelect = async (lat, lng) => {
     setFormData((prev) => ({
       ...prev,
       latitude: lat.toFixed(6),
       longitude: lng.toFixed(6),
     }));
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await response.json();
+      if (data && data.display_name) {
+        setFormData(prev => ({ ...prev, address: data.display_name }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch address:", error);
+    }
   };
+
+  const handleVerifySecurityCode = async () => {
+    if (!formData.securityCode) return;
+    setIsVerifyingCode(true);
+    try {
+      await AuthService.verifyAdminCode({ securityCode: formData.securityCode });
+      setIsAdminVerified(true);
+      alert("Admin code verified successfully. You may proceed.");
+    } catch (error) {
+      alert("Security code didn't match. You can't register as admin.");
+      setIsAdminVerified(false);
+    } finally {
+      setIsVerifyingCode(false);
+    }
+  };
+
+  const isFormDisabled = formData.role === "admin" && !isAdminVerified;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isFormDisabled) {
+      alert("Please verify admin security code first.");
+      return;
+    }
 
     if (showOtpInput) {
       // Verify OTP logic
@@ -51,6 +93,11 @@ function Register() {
         alert("Verification Failed: " + (error.response?.data?.message || "Invalid OTP"));
       }
     } else {
+      if (formData.password !== formData.confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
       // Register and Send OTP logic
       const submissionData = {
         ...formData,
@@ -65,6 +112,7 @@ function Register() {
       };
       delete submissionData.latitude;
       delete submissionData.longitude;
+      delete submissionData.confirmPassword;
 
       try {
         const responseData = await register(submissionData);
@@ -90,6 +138,7 @@ function Register() {
             value={formData.name}
             onChange={handleChange}
             required
+            disabled={isFormDisabled}
           />
 
           <input
@@ -99,6 +148,7 @@ function Register() {
             value={formData.email}
             onChange={handleChange}
             required
+            disabled={isFormDisabled}
           />
 
           <div className="password-wrapper">
@@ -109,6 +159,7 @@ function Register() {
               value={formData.password}
               onChange={handleChange}
               required
+              disabled={isFormDisabled}
             />
             <span
               onClick={() => setShowPassword(!showPassword)}
@@ -118,12 +169,59 @@ function Register() {
             </span>
           </div>
 
-          <select name="role" value={formData.role} onChange={handleChange}>
+          <div className="password-wrapper" style={{ marginTop: "10px", marginBottom: "15px" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              disabled={isFormDisabled}
+            />
+          </div>
+
+          <select name="role" value={formData.role} onChange={handleChange} required>
             <option value="">Select Role</option>
             <option value="volunteer">Volunteer</option>
             <option value="ngo">NGO</option>
             <option value="admin">Admin</option>
           </select>
+
+          {formData.role === "admin" && (
+            <div style={{ display: 'flex', flexDirection: 'column', marginTop: '10px', marginBottom: '15px' }}>
+              <input
+                type="password"
+                name="securityCode"
+                placeholder="Enter Admin Security Code"
+                value={formData.securityCode}
+                onChange={handleChange}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleVerifySecurityCode())}
+                required
+                disabled={isAdminVerified}
+                style={{ width: '100%', marginBottom: '10px' }}
+              />
+              {!isAdminVerified && (
+                <button
+                  type="button"
+                  onClick={handleVerifySecurityCode}
+                  disabled={isVerifyingCode}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontWeight: "bold"
+                  }}
+                >
+                  {isVerifyingCode ? "..." : "Verify"}
+                </button>
+              )}
+            </div>
+          )}
 
           <input
             type="text"
@@ -131,6 +229,7 @@ function Register() {
             placeholder="Skills (comma separated)"
             value={formData.skills}
             onChange={handleChange}
+            disabled={isFormDisabled}
           />
 
           <textarea
@@ -139,58 +238,76 @@ function Register() {
             value={formData.bio}
             onChange={handleChange}
             rows="2"
+            disabled={isFormDisabled}
             style={{
               padding: "8px",
               borderRadius: "5px",
               border: "1px solid #ccc",
               width: "100%",
+              opacity: isFormDisabled ? 0.6 : 1
             }}
           ></textarea>
 
-          <div className="full-width">
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              Select Location on Map:
-            </label>
-            <MapPicker
-              onLocationSelect={handleLocationSelect}
-              initialLat={formData.latitude}
-              initialLng={formData.longitude}
-            />
-          </div>
+          <div className="full-width" style={{ marginBottom: "15px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5px" }}>
+              <label style={{ margin: 0, fontWeight: "bold" }}>Address Details:</label>
+              <div style={{ display: "flex", gap: "5px" }}>
+                <button
+                  type="button"
+                  onClick={() => setLocationMode("manual")}
+                  disabled={isFormDisabled}
+                  style={{
+                    padding: "4px 10px",
+                    fontSize: "12px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    backgroundColor: locationMode === "manual" ? "#4CAF50" : "#f1f1f1",
+                    color: locationMode === "manual" ? "white" : "black",
+                    cursor: isFormDisabled ? "not-allowed" : "pointer"
+                  }}
+                >
+                  Type Manual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocationMode("map")}
+                  disabled={isFormDisabled}
+                  style={{
+                    padding: "4px 10px",
+                    fontSize: "12px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    backgroundColor: locationMode === "map" ? "#4CAF50" : "#f1f1f1",
+                    color: locationMode === "map" ? "white" : "black",
+                    cursor: isFormDisabled ? "not-allowed" : "pointer"
+                  }}
+                >
+                  Pick on Map
+                </button>
+              </div>
+            </div>
 
-          <div className="full-width">
             <input
               type="text"
               name="address"
-              placeholder="Full Address"
+              placeholder={locationMode === "map" ? "Pin location on map or edit here" : "Enter your Full Address"}
               value={formData.address}
               onChange={handleChange}
               required
+              disabled={isFormDisabled}
+              style={{ marginTop: "10px", marginBottom: "15px" }}
             />
-          </div>
 
-          <div
-            className="full-width"
-            style={{ display: "flex", gap: "10px" }}
-          >
-            <input
-              type="number"
-              name="latitude"
-              placeholder="Latitude"
-              value={formData.latitude}
-              onChange={handleChange}
-              step="any"
-              style={{ flex: 1 }}
-            />
-            <input
-              type="number"
-              name="longitude"
-              placeholder="Longitude"
-              value={formData.longitude}
-              onChange={handleChange}
-              step="any"
-              style={{ flex: 1 }}
-            />
+            {locationMode === "map" && (
+              <div style={{ marginTop: "10px", marginBottom: "15px", pointerEvents: isFormDisabled ? "none" : "auto", opacity: isFormDisabled ? 0.6 : 1 }}>
+                <p style={{ fontSize: "12px", color: "gray", marginBottom: "10px" }}>Click on the map to pin your location. The address will fill automatically.</p>
+                <MapPicker
+                  onLocationSelect={handleLocationSelect}
+                  initialLat={formData.latitude}
+                  initialLng={formData.longitude}
+                />
+              </div>
+            )}
           </div>
 
           {showOtpInput && (

@@ -33,12 +33,18 @@ The backend runs on **Node.js + Express** with **MongoDB**.
 
    # Authentication
    JWT_SECRET=your_super_secret_key_here
+   ADMIN_SECURITY_CODE=your_secret_admin_code_here # Required to register an 'admin' role
 
    # Email Service (Required for OTP)
    EMAIL_USER=your_email@gmail.com
    EMAIL_PASS=your_email_app_password
+
+   # Admin Access
+   ADMIN_SECURITY_CODE=your_secret_admin_code_here # Required to register an 'admin' role
    ```
    > **Note:** For Gmail, use an **App Password** if 2-Step Verification is enabled.
+   
+   > **Admin Access:** To register as an Admin, a user must select the 'Admin' role on the registration page and enter the exact `ADMIN_SECURITY_CODE` defined in your `.env` file.
 
 4. Start the server:
    ```bash

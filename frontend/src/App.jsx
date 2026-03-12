@@ -13,6 +13,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 import OpportunityList from "./pages/Opportunities/OpportunityList";
 import OpportunityForm from "./pages/Opportunities/OpportunityForm";
+import SchedulePickup from "./pages/Pickups/SchedulePickup";
 
 function App() {
   return (
@@ -33,6 +34,9 @@ function App() {
               <Route path="/opportunities" element={<OpportunityList />} />
               <Route path="/opportunities/create" element={<OpportunityForm />} />
               <Route path="/opportunities/edit/:id" element={<OpportunityForm />} />
+
+              {/* Pickup Routes */}
+              <Route path="/schedule-pickup" element={<SchedulePickup />} />
             </Route>
 
             {/* Example of Role-Based Route (Future usage) */}

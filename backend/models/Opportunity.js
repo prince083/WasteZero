@@ -24,6 +24,9 @@ const OpportunitySchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    date: {
+        type: Date
+    },
     // GeoJSON Point for location
     location: {
         type: {

@@ -5,7 +5,7 @@ const OpportunityService = {
     getAllOpportunities: async () => {
         try {
             const response = await api.get('/opportunities');
-            return response.data.opportunities || response.data;
+            return response.data.data || response.data.opportunities || response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to fetch opportunities';
         }
@@ -15,7 +15,7 @@ const OpportunityService = {
     getOpportunityById: async (opportunityId) => {
         try {
             const response = await api.get(`/opportunities/${opportunityId}`);
-            return response.data.opportunity || response.data;
+            return response.data.data || response.data.opportunity || response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to fetch opportunity details';
         }
@@ -25,7 +25,7 @@ const OpportunityService = {
     getMyOpportunities: async () => {
         try {
             const response = await api.get('/opportunities/my');
-            return response.data.opportunities || response.data;
+            return response.data.data || response.data.opportunities || response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to fetch your opportunities';
         }
@@ -35,7 +35,7 @@ const OpportunityService = {
     createOpportunity: async (opportunityData) => {
         try {
             const response = await api.post('/opportunities', opportunityData);
-            return response.data.opportunity || response.data;
+            return response.data.data || response.data.opportunity || response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to create opportunity';
         }
@@ -45,7 +45,7 @@ const OpportunityService = {
     updateOpportunity: async (opportunityId, opportunityData) => {
         try {
             const response = await api.put(`/opportunities/${opportunityId}`, opportunityData);
-            return response.data.opportunity || response.data;
+            return response.data.data || response.data.opportunity || response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to update opportunity';
         }
@@ -75,7 +75,7 @@ const OpportunityService = {
     getAppliedOpportunities: async () => {
         try {
             const response = await api.get('/opportunities/applied');
-            return response.data.opportunities || response.data;
+            return response.data.data || response.data.opportunities || response.data;
         } catch (error) {
             // If endpoint doesn't exist yet, return empty array
             return [];
@@ -86,7 +86,7 @@ const OpportunityService = {
     getOpportunityApplicants: async (opportunityId) => {
         try {
             const response = await api.get(`/opportunities/${opportunityId}/applicants`);
-            return response.data.applicants || response.data;
+            return response.data.applicants || response.data.data || response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to fetch applicants';
         }
@@ -96,7 +96,7 @@ const OpportunityService = {
     searchOpportunities: async (filters) => {
         try {
             const response = await api.get('/opportunities/search', { params: filters });
-            return response.data.opportunities || response.data;
+            return response.data.data || response.data.opportunities || response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to search opportunities';
         }
