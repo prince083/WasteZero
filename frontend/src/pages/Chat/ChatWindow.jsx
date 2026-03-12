@@ -56,8 +56,9 @@ const ChatWindow = () => {
         // 2. Initialize socket
         const socket = initiateSocketConnection(user._id);
 
-        // Join room
+        // Join room and tell the backend we are currently reading these messages
         socket.emit('join_room', { roomId });
+        socket.emit('mark_messages_read', { roomId, userId: user._id });
 
         // 3. Listen for incoming messages
         const messageHandler = (messageData) => {
@@ -73,12 +74,11 @@ const ChatWindow = () => {
 
         socket.on('receive_message', messageHandler);
 
-        // On unmount: disconnect socket and remove listeners
+        // On unmount: remove listeners only (Layout will handle actual disconnection)
         return () => {
-            socket.off('receive_message', messageHandler);
-            // Optionally, we could leave disconnectSocket() out if we want persistent sockets,
-            // but for a focused chat window, disconnecting/cleaning up is safe.
-            disconnectSocket();
+            if (socket) {
+                socket.off('receive_message', messageHandler);
+            }
         };
     }, [user, roomId]);
 
