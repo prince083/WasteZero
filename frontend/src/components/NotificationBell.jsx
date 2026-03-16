@@ -92,7 +92,7 @@ const NotificationBell = () => {
       </button>
 
       {open && (
-        <div className={`absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl shadow-xl overflow-hidden z-50 border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+        <div className={`absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl shadow-xl overflow-hidden z-[1000] border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
           }`}>
           <div className={`px-4 py-3 flex items-center justify-between border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-100 bg-gray-50'
             }`}>

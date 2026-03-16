@@ -198,7 +198,7 @@ const SchedulePickup = () => {
                                         disabled={loading}
                                         className={`flex-1 md:flex-none px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-white transition-all shadow-xl shadow-green-900/10 ${loading ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 active:scale-95'}`}
                                     >
-                                        {loading ? 'Please wait...' : 'Schedule Collection'}
+                                        {loading ? 'Please wait...' : 'Schedule Pickup'}
                                     </button>
                                     <button
                                         type="button"

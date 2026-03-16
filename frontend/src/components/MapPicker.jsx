@@ -66,7 +66,7 @@ function MapPicker({ onLocationSelect, initialLat, initialLng }) {
     }, [initialLat, initialLng]);
 
     return (
-        <div style={{ height: "200px", width: "100%", borderRadius: "8px", overflow: "hidden", marginBottom: "10px" }}>
+        <div style={{ height: "100%", width: "100%", borderRadius: "8px", overflow: "hidden" }}>
             <MapContainer center={center} zoom={13} style={{ height: "100%", width: "100%" }}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

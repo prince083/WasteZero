@@ -47,7 +47,7 @@ const Navbar = () => {
                     </div>
 
                     {isDropdownOpen && (
-                        <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white border border-gray-100'}`}>
+                        <div className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-[1000] ${isDarkMode ? 'bg-gray-700' : 'bg-white border border-gray-100'}`}>
                             <button
                                 onClick={handleLogout}
                                 className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${isDarkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
