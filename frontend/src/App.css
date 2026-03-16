@@ -83,7 +83,7 @@ body {
   /* Center vertically in the input container */
 }
 
-h2 {
+.form-box h2 {
   text-align: center;
   margin-bottom: 10px;
   font-size: 1.25rem;

@@ -100,6 +100,36 @@ const OpportunityService = {
         } catch (error) {
             throw error.response?.data?.message || 'Failed to search opportunities';
         }
+    },
+
+    // Get all volunteers accepted by the NGO (for dispatching)
+    getMyVolunteers: async () => {
+        try {
+            const response = await api.get('/opportunities/my-volunteers');
+            return response.data.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch your volunteers';
+        }
+    },
+
+    // Get all applications for NGO's opportunities
+    getAllMyApplications: async () => {
+        try {
+            const response = await api.get('/opportunities/all-applications');
+            return response.data.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch applications';
+        }
+    },
+
+    // Update application status
+    updateApplicationStatus: async (opportunityId, applicationId, status) => {
+        try {
+            const response = await api.patch(`/opportunities/${opportunityId}/applicants/${applicationId}`, { status });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to update application status';
+        }
     }
 };
 

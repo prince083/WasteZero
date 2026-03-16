@@ -12,8 +12,9 @@ import {
     FaCog,
     FaQuestionCircle,
     FaShieldAlt,
-    FaMoon,
-    FaSun
+    FaSun,
+    FaTruck,
+    FaUsers
 } from 'react-icons/fa';
 
 const Sidebar = () => {
@@ -23,12 +24,14 @@ const Sidebar = () => {
     const menuItems = [
         { name: 'Dashboard', icon: <FaThLarge />, path: '/dashboard' },
         // Volunteers can schedule pickups
-        ...(user?.role === 'volunteer' ? [{ name: 'Schedule Pickup', icon: <FaCalendarAlt />, path: '/schedule-pickup' }] : []),
+        ...(user?.role === 'volunteer' ? [
+            { name: 'Schedule Pickup', icon: <FaCalendarAlt />, path: '/schedule-pickup' }
+        ] : []),
         // NGOs see pickups assigned to them
-        ...(user?.role === 'ngo' ? [{ name: 'Assigned Pickups', icon: <FaCalendarAlt />, path: '/assigned-pickups' }] : []),
+        ...(user?.role === 'ngo' ? [] : []),
         // Hide Opportunities from Admin
         ...(user?.role !== 'admin' ? [{ name: 'Opportunities', icon: <FaLightbulb />, path: '/opportunities' }] : []),
-        { name: 'Messages', icon: <FaEnvelope />, path: '/messages' },
+        { name: 'Messages', icon: <FaEnvelope />, path: '/chat' },
         { name: 'My Impact', icon: <FaChartLine />, path: '/impact' },
     ];
 

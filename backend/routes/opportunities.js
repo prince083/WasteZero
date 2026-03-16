@@ -14,6 +14,8 @@ const {
     getAppliedOpportunities,
     getOpportunityApplicants,
     updateApplicationStatus,
+    getAllMyApplications,
+    getMyVolunteers,
     searchOpportunities
 } = require('../controllers/opportunityController');
 // Search Opportunities (All)
@@ -48,6 +50,20 @@ router.get(
 );
 
 
+
+// Get All Applications for NGO (Across all opportunities)
+router.get(
+    '/all-applications',
+    authorizeRoles('ngo'),
+    getAllMyApplications
+);
+
+// Get My Volunteers (All accepted volunteers across all opportunities)
+router.get(
+    '/my-volunteers',
+    authorizeRoles('ngo'),
+    getMyVolunteers
+);
 
 // Get Applicants for Opportunity (NGO/Admin only)
 router.get(

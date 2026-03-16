@@ -6,6 +6,7 @@ const {
     getMyPickups,
     getAssignedPickups,
     updatePickupStatus,
+    dispatchPickup,
     getAllPickups
 } = require('../controllers/pickupController');
 
@@ -23,6 +24,9 @@ router.get('/assigned', auth, authorizeRoles('ngo'), getAssignedPickups);
 
 // PATCH /api/pickups/:id/status — NGO/admin updates pickup status
 router.patch('/:id/status', auth, authorizeRoles('ngo', 'admin'), updatePickupStatus);
+
+// PATCH /api/pickups/:id/dispatch — NGO dispatches to volunteer staff
+router.patch('/:id/dispatch', auth, authorizeRoles('ngo'), dispatchPickup);
 
 // GET /api/pickups — admin views all pickups
 router.get('/', auth, authorizeRoles('admin'), getAllPickups);

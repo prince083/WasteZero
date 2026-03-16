@@ -157,6 +157,61 @@ const updatePickupStatus = async (req, res, next) => {
 // GET /api/pickups  (Admin only)
 // Admin views all pickups across the platform
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// PATCH /api/pickups/:id/dispatch
+// NGO agent dispatches a pickup to a specific volunteer staff member
+// ─────────────────────────────────────────────────────────────
+const dispatchPickup = async (req, res, next) => {
+    try {
+        const { volunteer_id } = req.body;
+        const pickup = await Pickup.findById(req.params.id);
+
+        if (!pickup) {
+            return res.status(404).json({ success: false, message: 'Pickup not found' });
+        }
+
+        // Only the currently assigned NGO can dispatch to their own staff
+        if (pickup.agent_id?.toString() !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Only the assigned NGO can dispatch this pickup' });
+        }
+
+        // Update the pickup to point to the volunteer now
+        pickup.agent_id = volunteer_id;
+        pickup.status = 'assigned';
+        await pickup.save();
+
+        // Notify the volunteer
+        await Notification.create({
+            user_id: volunteer_id,
+            type: 'general',
+            message: `You have been dispatched for a pickup at ${pickup.address}`,
+            link: '/tasks' // A new route we will build
+        });
+
+        // Push real-time notification
+        const io = req.app.get('io');
+        const onlineUsers = req.app.get('onlineUsers');
+        if (io && onlineUsers) {
+            const volunteerSocketId = onlineUsers.get(volunteer_id.toString());
+            if (volunteerSocketId) {
+                io.to(volunteerSocketId).emit('new_notification', {
+                    type: 'general',
+                    message: `📍 New Pickup Task: You have been assigned a pickup at ${pickup.address}`,
+                    link: '/tasks'
+                });
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Pickup dispatched successfully',
+            data: pickup
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const getAllPickups = async (req, res, next) => {
     try {
         const pickups = await Pickup.find()
@@ -179,5 +234,6 @@ module.exports = {
     getMyPickups,
     getAssignedPickups,
     updatePickupStatus,
+    dispatchPickup,
     getAllPickups
 };

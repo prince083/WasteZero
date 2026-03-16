@@ -5,6 +5,8 @@ import Sidebar from '../../components/Sidebar';
 import Navbar from '../../components/Navbar';
 import MapPicker from '../../components/MapPicker';
 import api from '../../services/api';
+import VolunteerTasks from './VolunteerTasks';
+import { useAuth } from '../../context/AuthContext';
 
 const WASTE_CATEGORIES = [
     { value: 'plastic', label: '♻️ Plastic' },
@@ -18,7 +20,9 @@ const WASTE_CATEGORIES = [
 
 const SchedulePickup = () => {
     const { isDarkMode } = useTheme();
+    const { user } = useAuth();
     const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('schedule'); // 'schedule' or 'tasks'
 
     const [formData, setFormData] = useState({
         category: '',
@@ -36,14 +40,12 @@ const SchedulePickup = () => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    // Called by MapPicker when user drops a pin — receives (lat, lng) as two args
     const handleLocationSelect = async (lat, lng) => {
         setFormData(prev => ({
             ...prev,
-            location: { type: 'Point', coordinates: [lng, lat] }  // GeoJSON: [lng, lat]
+            location: { type: 'Point', coordinates: [lng, lat] }
         }));
 
-        // Reverse geocode to auto-fill address (same as OpportunityForm + Registration)
         try {
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
@@ -70,10 +72,7 @@ const SchedulePickup = () => {
             setLoading(true);
             const response = await api.post('/pickups', formData);
             setSuccess(response.data.message || 'Pickup scheduled successfully!');
-
-            // Reset form after success
             setTimeout(() => navigate('/dashboard'), 2000);
-
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to schedule pickup. Please try again.');
         } finally {
@@ -81,27 +80,51 @@ const SchedulePickup = () => {
         }
     };
 
-    const inputClass = `w-full p-3 rounded-xl border focus:ring-2 focus:ring-green-500 outline-none transition-all ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-gray-50 border-gray-200 text-gray-800'}`;
-    const labelClass = 'block text-sm font-medium mb-2';
+    const inputClass = `w-full p-4 rounded-2xl border focus:ring-2 focus:ring-green-500 outline-none transition-all ${isDarkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-800'}`;
+    const labelClass = 'block text-[10px] font-black uppercase tracking-widest mb-2 ml-1 text-gray-400';
 
     return (
         <div className={`flex h-screen w-full transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Navbar />
-                <main className="flex-1 overflow-y-auto p-8">
+                <main className="flex-1 overflow-y-auto p-8 lg:p-12">
 
-                    {/* Page Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold mb-1">Schedule a Pickup</h1>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            Fill in the details below and we'll assign the nearest available agent to collect your waste.
-                        </p>
+                    {/* Header with Tabs */}
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+                        <div>
+                            <h1 className="text-4xl font-black mb-2 tracking-tight">
+                                {activeTab === 'schedule' ? 'Schedule a Pickup' : 'My Dispatch Tasks'}
+                            </h1>
+                            <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {activeTab === 'schedule'
+                                    ? "Fill in the details below and we'll assign the nearest available agent."
+                                    : "View and manage pickups dispatched to you by your NGO."}
+                            </p>
+                        </div>
+
+                        {/* TABS - Only visible to volunteers (who can have tasks) */}
+                        {user?.role === 'volunteer' && (
+                            <div className="flex bg-white dark:bg-gray-800 p-1 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                                <button
+                                    onClick={() => setActiveTab('schedule')}
+                                    className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-tighter transition-all ${activeTab === 'schedule' ? 'bg-green-600 text-white shadow-lg shadow-green-900/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                                >
+                                    New Pickup
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('tasks')}
+                                    className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-tighter transition-all ${activeTab === 'tasks' ? 'bg-green-600 text-white shadow-lg shadow-green-900/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                                >
+                                    My Tasks
+                                </button>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Fixed Toast Notification — always visible regardless of scroll */}
+                    {/* Fixed Toast Notification */}
                     {(success || error) && (
-                        <div className={`fixed bottom-6 right-6 z-50 flex items-start gap-3 px-5 py-4 rounded-2xl shadow-2xl border max-w-sm animate-bounce-once transition-all
+                        <div className={`fixed bottom-10 right-10 z-50 flex items-start gap-4 px-6 py-5 rounded-3xl shadow-2xl border max-w-sm animate-in slide-in-from-bottom-5 duration-300
                             ${success
                                 ? 'bg-green-600 border-green-500 text-white'
                                 : isDarkMode
@@ -109,133 +132,89 @@ const SchedulePickup = () => {
                                     : 'bg-red-600 border-red-500 text-white'
                             }`}
                         >
-                            <span className="text-xl mt-0.5">{success ? '✅' : '⚠️'}</span>
+                            <span className="text-2xl">{success ? '✅' : '⚠️'}</span>
                             <div>
-                                <p className="font-semibold text-sm">{success ? 'Success!' : 'Error'}</p>
-                                <p className="text-xs opacity-90 mt-0.5">
+                                <p className="font-black text-sm uppercase tracking-wider">{success ? 'Success!' : 'Oops!'}</p>
+                                <p className="text-xs font-medium opacity-90 mt-1 leading-relaxed">
                                     {success || error}
-                                    {success && ' — Redirecting...'}
+                                    {success && ' — Returning to Dashboard...'}
                                 </p>
                             </div>
-                            {error && (
-                                <button
-                                    onClick={() => setError(null)}
-                                    className="ml-auto text-white opacity-70 hover:opacity-100 text-lg leading-none"
-                                >
-                                    ×
-                                </button>
-                            )}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
-                        <div className={`rounded-2xl p-8 shadow-sm border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {activeTab === 'schedule' ? (
+                        <form onSubmit={handleSubmit} className="animate-in fade-in duration-500">
+                            <div className={`rounded-3xl p-8 lg:p-10 shadow-sm border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-                                {/* Left Column */}
-                                <div className="space-y-6">
-
-                                    {/* Waste Category */}
-                                    <div>
-                                        <label className={labelClass}>Waste Category <span className="text-red-500">*</span></label>
-                                        <select
-                                            name="category"
-                                            value={formData.category}
-                                            onChange={handleChange}
-                                            className={inputClass}
-                                            required
-                                        >
-                                            <option value="">Select category...</option>
-                                            {WASTE_CATEGORIES.map(cat => (
-                                                <option key={cat.value} value={cat.value}>{cat.label}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* Scheduled Time */}
-                                    <div>
-                                        <label className={labelClass}>Pickup Date & Time <span className="text-red-500">*</span></label>
-                                        <input
-                                            type="datetime-local"
-                                            name="scheduled_time"
-                                            value={formData.scheduled_time}
-                                            onChange={handleChange}
-                                            min={new Date().toISOString().slice(0, 16)}
-                                            className={inputClass}
-                                            required
-                                        />
-                                    </div>
-
-                                    {/* Address */}
-                                    <div>
-                                        <label className={labelClass}>Pickup Address <span className="text-red-500">*</span></label>
-                                        <input
-                                            type="text"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleChange}
-                                            placeholder="Enter your pickup address"
-                                            className={inputClass}
-                                            required
-                                        />
-                                        <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                            Or drop a pin on the map →
-                                        </p>
-                                    </div>
-
-                                    {/* Notes */}
-                                    <div>
-                                        <label className={labelClass}>Additional Notes <span className="text-gray-400">(optional)</span></label>
-                                        <textarea
-                                            name="notes"
-                                            value={formData.notes}
-                                            onChange={handleChange}
-                                            rows={4}
-                                            placeholder="e.g., Gate code, quantity of bags, special instructions..."
-                                            className={inputClass}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Right Column — Map */}
-                                <div>
-                                    <label className={labelClass}>Pin Your Location</label>
-                                    <div className="rounded-xl overflow-hidden border border-gray-300 h-72">
-                                        <MapPicker onLocationSelect={handleLocationSelect} />
-                                    </div>
-                                    <p className={`mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                        📍 Click on the map to set your exact pickup location. This helps us assign the nearest agent.
-                                    </p>
-
-                                    {/* Location confirmed indicator */}
-                                    {formData.location.coordinates[0] !== 0 && (
-                                        <div className="mt-3 flex items-center gap-2 text-green-500 text-sm font-medium">
-                                            <span>✅</span>
-                                            <span>Location pinned ({formData.location.coordinates[1].toFixed(4)}, {formData.location.coordinates[0].toFixed(4)})</span>
+                                    {/* Form Fields */}
+                                    <div className="space-y-8">
+                                        <div>
+                                            <label className={labelClass}>Waste Category <span className="text-red-500">*</span></label>
+                                            <select name="category" value={formData.category} onChange={handleChange} className={inputClass} required>
+                                                <option value="">Select category...</option>
+                                                {WASTE_CATEGORIES.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
+                                            </select>
                                         </div>
-                                    )}
+
+                                        <div>
+                                            <label className={labelClass}>Date & Time <span className="text-red-500">*</span></label>
+                                            <input type="datetime-local" name="scheduled_time" value={formData.scheduled_time} onChange={handleChange} min={new Date().toISOString().slice(0, 16)} className={inputClass} required />
+                                        </div>
+
+                                        <div>
+                                            <label className={labelClass}>Pickup Address <span className="text-red-500">*</span></label>
+                                            <input type="text" name="address" value={formData.address} onChange={handleChange} placeholder="House no, Street, Landmark..." className={inputClass} required />
+                                        </div>
+
+                                        <div>
+                                            <label className={labelClass}>Instructions <span className="text-gray-500">(optional)</span></label>
+                                            <textarea name="notes" value={formData.notes} onChange={handleChange} rows={4} placeholder="e.g., Use back gate, call on arrival..." className={inputClass} />
+                                        </div>
+                                    </div>
+
+                                    {/* Map Side */}
+                                    <div>
+                                        <label className={labelClass}>Confirm Precise Location</label>
+                                        <div className="rounded-3xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700 h-[400px]">
+                                            <MapPicker onLocationSelect={handleLocationSelect} />
+                                        </div>
+                                        <div className="mt-4 flex items-center justify-between">
+                                            <p className="text-[11px] font-bold text-gray-400">Click map to pin address</p>
+                                            {formData.location.coordinates[0] !== 0 && (
+                                                <span className="text-[11px] font-bold text-green-500 flex items-center gap-1">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                                    Location Verified
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-12 flex flex-col md:flex-row gap-4 border-t border-gray-50 dark:border-gray-700 pt-10">
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className={`flex-1 md:flex-none px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-white transition-all shadow-xl shadow-green-900/10 ${loading ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700 active:scale-95'}`}
+                                    >
+                                        {loading ? 'Please wait...' : 'Schedule Pickup'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate('/dashboard')}
+                                        className={`px-12 py-4 rounded-2xl font-black uppercase tracking-widest transition-all border ${isDarkMode ? 'border-gray-700 text-gray-400 hover:bg-gray-700' : 'border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+                                    >
+                                        Back
+                                    </button>
                                 </div>
                             </div>
-
-                            {/* Submit */}
-                            <div className="mt-8 flex gap-4">
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className={`px-8 py-3 rounded-xl font-semibold text-white transition-all ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 active:scale-95 shadow-md hover:shadow-lg'}`}
-                                >
-                                    {loading ? 'Scheduling...' : '📅 Schedule Pickup'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/dashboard')}
-                                    className={`px-8 py-3 rounded-xl font-semibold transition-all border ${isDarkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 text-gray-600 hover:bg-gray-100'}`}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
+                        </form>
+                    ) : (
+                        <div className="animate-in slide-in-from-right-10 duration-500">
+                            <VolunteerTasks />
                         </div>
-                    </form>
+                    )}
 
                 </main>
             </div>

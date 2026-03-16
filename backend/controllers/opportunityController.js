@@ -3,7 +3,6 @@ const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const createOpportunity = async (req, res, next) => {
     try {
-
         const { title, description, required_skills, duration, location, address, status } = req.body;
 
         const opportunity = await Opportunity.create({
@@ -334,6 +333,73 @@ const updateApplicationStatus = async (req, res, next) => {
     }
 };
 
+// ─────────────────────────────────────────────────────────────
+// GET /api/opportunities/all-applications
+// NGO sees ALL applications across ALL their posted opportunities
+// ─────────────────────────────────────────────────────────────
+const getAllMyApplications = async (req, res, next) => {
+    try {
+        const ngoId = req.user.id;
+
+        // 1. Find all opportunities owned by this NGO
+        const myOpps = await Opportunity.find({ ngo_id: ngoId });
+        const oppIds = myOpps.map(opp => opp._id);
+
+        // 2. Find all applications for these opportunities
+        const applications = await Application.find({
+            opportunity_id: { $in: oppIds }
+        })
+            .populate("volunteer_id", "name email skills bio location")
+            .populate("opportunity_id", "title")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: applications.length,
+            data: applications,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// ─────────────────────────────────────────────────────────────
+// GET /api/opportunities/my-volunteers
+// NGO sees all volunteers they have accepted across all their opportunities
+// ─────────────────────────────────────────────────────────────
+const getMyVolunteers = async (req, res, next) => {
+    try {
+        const ngoId = req.user.id;
+
+        // 1. Find all opportunities owned by this NGO
+        const myOpps = await Opportunity.find({ ngo_id: ngoId });
+        const oppIds = myOpps.map(opp => opp._id);
+
+        // 2. Find all "accepted" applications for these opportunities
+        const applications = await Application.find({
+            opportunity_id: { $in: oppIds },
+            status: 'accepted'
+        }).populate('volunteer_id', 'name email skills location bio');
+
+        // 3. Extract unique list of volunteers
+        const volunteersMap = new Map();
+        applications.forEach(app => {
+            if (app.volunteer_id) {
+                volunteersMap.set(app.volunteer_id._id.toString(), app.volunteer_id);
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            count: volunteersMap.size,
+            data: Array.from(volunteersMap.values())
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     createOpportunity,
     getOpportunities,
@@ -345,5 +411,7 @@ module.exports = {
     getAppliedOpportunities,
     getOpportunityApplicants,
     updateApplicationStatus,
+    getAllMyApplications,
+    getMyVolunteers,
     searchOpportunities
 };
