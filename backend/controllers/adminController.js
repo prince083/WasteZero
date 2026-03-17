@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const AdminLog = require("../models/AdminLog");
-const { generateCSV } = require("../utils/reportGenerator");
+const Opportunity = require("../models/Opportunity");
+const Pickup = require("../models/Pickup");
+const { generateCSV, generatePDF } = require("../utils/reportGenerator");
 const path = require("path");
 
 //  Get all users
@@ -105,4 +107,123 @@ const downloadLogs = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, suspendUser, unsuspendUser, getLogs, downloadLogs };
+// @desc    Get platform-wide statistics for the admin dashboard
+const getPlatformStats = async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments();
+        const activeUsers = await User.countDocuments({ status: "active" });
+        const suspendedUsers = await User.countDocuments({ status: "suspended" });
+
+        const ngoCount = await User.countDocuments({ role: "ngo" });
+        const volunteerCount = await User.countDocuments({ role: "volunteer" });
+
+        const totalOpportunities = await Opportunity.countDocuments();
+        const activeOpportunities = await Opportunity.countDocuments({ status: "open" });
+
+        const totalPickups = await Pickup.countDocuments();
+        const completedPickups = await Pickup.countDocuments({ status: "completed" });
+
+        res.json({
+            users: {
+                total: totalUsers,
+                active: activeUsers,
+                suspended: suspendedUsers,
+                ngos: ngoCount,
+                volunteers: volunteerCount
+            },
+            opportunities: {
+                total: totalOpportunities,
+                active: activeOpportunities
+            },
+            pickups: {
+                total: totalPickups,
+                completed: completedPickups
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// @desc    Moderate content by removing an opportunity
+const deleteOpportunity = async (req, res) => {
+    try {
+        const { opportunityId } = req.params;
+
+        const opportunity = await Opportunity.findById(opportunityId);
+
+        if (!opportunity) {
+            return res.status(404).json({ message: "Opportunity not found" });
+        }
+
+        await Opportunity.findByIdAndDelete(opportunityId);
+
+        await AdminLog.create({
+            admin_id: req.user.id,
+            action: "DELETE_OPPORTUNITY",
+            target_id: opportunityId,
+        });
+
+        res.json({ message: "Opportunity removed from platform successfully" });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+// @desc    Download Platform Impact Report as PDF
+const downloadPlatformReport = async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments();
+        const ngoCount = await User.countDocuments({ role: "ngo" });
+        const volunteerCount = await User.countDocuments({ role: "volunteer" });
+        const totalOpportunities = await Opportunity.countDocuments();
+        const totalPickups = await Pickup.countDocuments();
+
+        const reportData = {
+            users: {
+                total: totalUsers,
+                ngos: ngoCount,
+                volunteers: volunteerCount
+            },
+            opportunities: {
+                total: totalOpportunities
+            },
+            pickups: {
+                total: totalPickups
+            }
+        };
+
+        const filePath = path.join(__dirname, "../platform_report.pdf");
+        await generatePDF(reportData, filePath, "Platform Impact & Statistics Summary");
+
+        res.download(filePath, "WasteZero_Impact_Report.pdf");
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// @desc    Download Admin Logs as PDF
+const downloadLogsPDF = async (req, res) => {
+    try {
+        const logs = await AdminLog.find().populate("admin_id", "name").sort({ timestamp: -1 });
+        const filePath = path.join(__dirname, "../admin_logs.pdf");
+
+        await generatePDF(logs, filePath, "Administrative Audit Logs");
+
+        res.download(filePath, "Admin_Audit_Logs.pdf");
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+module.exports = {
+    getUsers,
+    suspendUser,
+    unsuspendUser,
+    getLogs,
+    downloadLogs,
+    getPlatformStats,
+    deleteOpportunity,
+    downloadPlatformReport,
+    downloadLogsPDF
+};
