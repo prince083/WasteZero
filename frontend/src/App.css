@@ -115,3 +115,66 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* usermanagementtable */
+
+.admin-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+}
+
+.title {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.table-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.table-header {
+  background: #334155;
+  font-weight: bold;
+}
+
+.table-row {
+  background: #0f172a;
+  align-items: center;
+}
+
+.status.green {
+  color: #22c55e;
+}
+
+.status.red {
+  color: #ef4444;
+}
+
+.btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+
+.btn.red {
+  background: #ef4444;
+}
+
+.btn.green {
+  background: #22c55e;
+}

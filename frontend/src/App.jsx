@@ -18,6 +18,7 @@ import SchedulePickup from "./pages/Pickups/SchedulePickup";
 import MatchDashboard from "./pages/Matches/MatchDashboard";
 import VolunteerTasks from "./pages/Pickups/VolunteerTasks";
 import ChatLayout from "./pages/Chat/ChatLayout";
+import AdminPanel from "./pages/Admin/AdminPanel";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/admin-panel" element={<AdminPanel />} />
 
               {/* Opportunity Routes */}
               <Route path="/opportunities" element={<OpportunityList />} />

@@ -104,7 +104,7 @@ const Sidebar = () => {
                         {user?.role === 'admin' && (
                             <li>
                                 <NavLink
-                                    to="/admin"
+                                    to="/admin-panel"
                                     className={({ isActive }) =>
                                         `flex items-center gap-3 px-4 py-2 rounded-md text-sm transition-colors ${isActive ? 'bg-green-50 text-green-600 font-medium dark:bg-gray-800 dark:text-green-400' : 'hover:bg-gray-100 text-gray-600 dark:text-gray-400 dark:hover:bg-gray-800'}`
                                     }

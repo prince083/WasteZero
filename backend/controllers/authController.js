@@ -13,6 +13,7 @@ async function register(req, res) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    
     if (role === 'admin') {
       if (!securityCode || securityCode !== process.env.ADMIN_SECURITY_CODE) {
         return res.status(403).json({ message: "Security code didn't match. You can't register as admin." });

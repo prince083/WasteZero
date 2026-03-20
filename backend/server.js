@@ -57,6 +57,7 @@ async function start() {
     console.log(`Server running on port ${port}`);
     console.log(`Socket.io ready`);
   });
+
 }
 
 start().catch(err => {
