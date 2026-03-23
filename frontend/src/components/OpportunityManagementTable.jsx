@@ -14,7 +14,8 @@ const OpportunityManagementTable = ({ searchTerm }) => {
             try {
                 // Using general opportunities endpoint but admin will use delete endpoint later
                 const res = await api.get("/opportunities");
-                setOpportunities(res.data);
+                // API returns { success: true, count: X, data: [...] }
+                setOpportunities(res.data.data || []);
             } catch (err) {
                 console.error("Failed to fetch opportunities:", err);
             } finally {

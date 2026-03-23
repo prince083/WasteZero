@@ -19,7 +19,11 @@ const getUsers = async (req, res) => {
 const suspendUser = async (req, res) => {
     try {
         const { userId } = req.params;
-        console.log(`[Admin] Suspending user: ${userId} by admin: ${req.user?.id}`);
+
+        // Basic format check for ObjectId
+        if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ message: "Invalid User ID format" });
+        }
 
         const user = await User.findById(userId);
 
@@ -27,12 +31,17 @@ const suspendUser = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // Security Check: You should not be able to suspend yourself!
+        if (userId === req.user.id) {
+            return res.status(403).json({ message: "You cannot suspend your own account!" });
+        }
+
         if (user.status === "suspended") {
             return res.status(400).json({ message: "User already suspended" });
         }
 
-        user.status = "suspended";
-        await user.save();
+        // Use findByIdAndUpdate to bypass full model validation (fixes "address required" error)
+        await User.findByIdAndUpdate(userId, { $set: { status: "suspended" } });
 
         try {
             await AdminLog.create({
@@ -42,10 +51,9 @@ const suspendUser = async (req, res) => {
             });
         } catch (logErr) {
             console.error("[AdminLog Error]", logErr);
-            // Don't fail the whole request if logging fails, but it points to our bug
         }
 
-        res.json({ message: "User suspended successfully", user });
+        res.json({ message: "User suspended successfully" });
 
     } catch (err) {
         console.error("[Suspend Error]", err);
@@ -57,7 +65,11 @@ const suspendUser = async (req, res) => {
 const unsuspendUser = async (req, res) => {
     try {
         const { userId } = req.params;
-        console.log(`[Admin] Unsuspending user: ${userId} by admin: ${req.user?.id}`);
+
+        // Basic format check for ObjectId
+        if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ message: "Invalid User ID format" });
+        }
 
         const user = await User.findById(userId);
 
@@ -69,8 +81,8 @@ const unsuspendUser = async (req, res) => {
             return res.status(400).json({ message: "User is already active" });
         }
 
-        user.status = "active";
-        await user.save();
+        // Use findByIdAndUpdate to bypass full model validation
+        await User.findByIdAndUpdate(userId, { $set: { status: "active" } });
 
         try {
             await AdminLog.create({
@@ -82,7 +94,7 @@ const unsuspendUser = async (req, res) => {
             console.error("[AdminLog Error]", logErr);
         }
 
-        res.json({ message: "User unsuspended successfully", user });
+        res.json({ message: "User unsuspended successfully" });
 
     } catch (err) {
         console.error("[Unsuspend Error]", err);

@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import api from "../services/api";
 import { exportRowsToCsv } from "../services/csvExportService";
+import { useAuth } from "../context/AuthContext";
 
 const UserManagementTable = ({ setStats, searchTerm }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const { isDarkMode } = useTheme();
+    const { user: currentUser } = useAuth();
 
     // Fetch users from backend on mount
     useEffect(() => {
@@ -131,10 +133,15 @@ const UserManagementTable = ({ setStats, searchTerm }) => {
                             <td className="py-3">
                                 <button
                                     onClick={() => toggleStatus(user._id)}
-                                    className={`px-3 py-1 rounded text-sm font-medium text-white transition-colors ${user.status === "suspended"
-                                            ? "bg-green-500 hover:bg-green-600"
-                                            : "bg-red-500 hover:bg-red-600"
-                                        }`}
+                                    disabled={currentUser?._id === user._id}
+                                    title={currentUser?._id === user._id ? "You cannot suspend yourself" : ""}
+                                    className={`px-3 py-1 rounded text-sm font-medium text-white transition-colors ${
+                                        currentUser?._id === user._id
+                                            ? "bg-gray-400 cursor-not-allowed"
+                                            : user.status === "suspended"
+                                                ? "bg-green-500 hover:bg-green-600"
+                                                : "bg-red-500 hover:bg-red-600"
+                                    }`}
                                 >
                                     {user.status === "suspended" ? "Unsuspend" : "Suspend"}
                                 </button>
