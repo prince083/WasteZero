@@ -19,6 +19,7 @@ const getUsers = async (req, res) => {
 const suspendUser = async (req, res) => {
     try {
         const { userId } = req.params;
+        console.log(`[Admin] Suspending user: ${userId} by admin: ${req.user?.id}`);
 
         const user = await User.findById(userId);
 
@@ -33,15 +34,21 @@ const suspendUser = async (req, res) => {
         user.status = "suspended";
         await user.save();
 
-        await AdminLog.create({
-            admin_id: req.user.id,
-            action: "SUSPEND_USER",
-            target_id: userId,
-        });
+        try {
+            await AdminLog.create({
+                admin_id: req.user.id,
+                action: "SUSPEND_USER",
+                target_id: userId,
+            });
+        } catch (logErr) {
+            console.error("[AdminLog Error]", logErr);
+            // Don't fail the whole request if logging fails, but it points to our bug
+        }
 
         res.json({ message: "User suspended successfully", user });
 
     } catch (err) {
+        console.error("[Suspend Error]", err);
         res.status(500).json({ error: err.message });
     }
 };
@@ -50,6 +57,7 @@ const suspendUser = async (req, res) => {
 const unsuspendUser = async (req, res) => {
     try {
         const { userId } = req.params;
+        console.log(`[Admin] Unsuspending user: ${userId} by admin: ${req.user?.id}`);
 
         const user = await User.findById(userId);
 
@@ -64,15 +72,20 @@ const unsuspendUser = async (req, res) => {
         user.status = "active";
         await user.save();
 
-        await AdminLog.create({
-            admin_id: req.user.id,
-            action: "UNSUSPEND_USER",
-            target_id: userId,
-        });
+        try {
+            await AdminLog.create({
+                admin_id: req.user.id,
+                action: "UNSUSPEND_USER",
+                target_id: userId,
+            });
+        } catch (logErr) {
+            console.error("[AdminLog Error]", logErr);
+        }
 
         res.json({ message: "User unsuspended successfully", user });
 
     } catch (err) {
+        console.error("[Unsuspend Error]", err);
         res.status(500).json({ error: err.message });
     }
 };

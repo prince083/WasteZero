@@ -19,6 +19,7 @@ import MatchDashboard from "./pages/Matches/MatchDashboard";
 import VolunteerTasks from "./pages/Pickups/VolunteerTasks";
 import ChatLayout from "./pages/Chat/ChatLayout";
 import AdminPanel from "./pages/Admin/AdminPanel";
+import ReportsPage from "./pages/Admin/ReportsPage";
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
 
               {/* Admin Panel Route */}
               <Route path="/admin-panel" element={<AdminPanel />} />
+              <Route path="/admin/reports" element={<ReportsPage />} />
             </Route>
           </Routes>
         </AuthProvider>

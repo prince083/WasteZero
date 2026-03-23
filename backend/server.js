@@ -39,8 +39,9 @@ async function start() {
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-      methods: ['GET', 'POST']
+      origin: [process.env.FRONTEND_URL || 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
+      methods: ['GET', 'POST'],
+      credentials: true
     }
   });
 

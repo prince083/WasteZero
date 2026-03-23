@@ -3,6 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 import Sidebar from "../../components/Sidebar";
 import UserManagementTable from "../../components/UserManagementTable";
 import Navbar from "../../components/Navbar";
+import { exportRowsToCsv } from "../../services/csvExportService";
 
 const AdminPanel = () => {
     const { isDarkMode } = useTheme();
@@ -44,8 +45,8 @@ const AdminPanel = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className={`w-full max-w-md px-4 py-2 rounded-md border text-sm ${isDarkMode
-                                    ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500"
-                                    : "bg-white border-gray-300 text-gray-800 placeholder-gray-400"
+                                ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                                : "bg-white border-gray-300 text-gray-800 placeholder-gray-400"
                                 }`}
                         />
                     </div>

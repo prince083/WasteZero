@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import opportunityService from '../../services/opportunityService';
 import wasteService from '../../services/wasteService';
+import { exportRowsToCsv } from '../../services/csvExportService';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
@@ -56,6 +57,17 @@ const AdminDashboard = () => {
                 alert(err.message || 'Failed to delete opportunity');
             }
         }
+    };
+
+    const downloadWasteReport = () => {
+        exportRowsToCsv({
+            filename: 'waste-impact-report.csv',
+            rows: trendData,
+            columns: [
+                { key: 'name', label: 'Month' },
+                { key: 'totalWeight', label: 'Total Weight (kg)' }
+            ]
+        });
     };
 
     if (loading) return (
@@ -130,6 +142,15 @@ const AdminDashboard = () => {
                         </ResponsiveContainer>
                     </div>
                 </div>
+            </div>
+
+            <div className="flex justify-end mb-8 -mt-4">
+                <button 
+                  onClick={downloadWasteReport}
+                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
+                >
+                    Download Full Waste Report (.csv)
+                </button>
             </div>
 
             {/* Opportunity Management Section */}

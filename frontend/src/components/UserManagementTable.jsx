@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import api from "../services/api";
+import { exportRowsToCsv } from "../services/csvExportService";
 
 const UserManagementTable = ({ setStats, searchTerm }) => {
     const [users, setUsers] = useState([]);
@@ -25,7 +26,7 @@ const UserManagementTable = ({ setStats, searchTerm }) => {
     // Recalculate stats whenever users change
     useEffect(() => {
         const total = users.length;
-        const suspended = users.filter((u) => u.isSuspended).length;
+        const suspended = users.filter((u) => u.status === "suspended").length;
         const active = total - suspended;
         setStats({ total, active, suspended });
     }, [users, setStats]);
@@ -34,13 +35,14 @@ const UserManagementTable = ({ setStats, searchTerm }) => {
     const toggleStatus = async (userId) => {
         try {
             const user = users.find((u) => u._id === userId);
-            const endpoint = user.isSuspended
+            const isSuspended = user.status === "suspended";
+            const endpoint = isSuspended
                 ? `/admin/unsuspend/${userId}`
                 : `/admin/suspend/${userId}`;
             await api.put(endpoint);
             setUsers((prev) =>
                 prev.map((u) =>
-                    u._id === userId ? { ...u, isSuspended: !u.isSuspended } : u
+                    u._id === userId ? { ...u, status: isSuspended ? "active" : "suspended" } : u
                 )
             );
         } catch (err) {
@@ -56,6 +58,19 @@ const UserManagementTable = ({ setStats, searchTerm }) => {
             u.email?.toLowerCase().includes(term)
         );
     });
+
+    const downloadUsers = () => {
+        exportRowsToCsv({
+            filename: 'user-report.csv',
+            rows: filteredUsers,
+            columns: [
+                { key: 'name', label: 'Name' },
+                { key: 'email', label: 'Email' },
+                { key: 'role', label: 'Role' },
+                { key: 'status', label: 'Status' }
+            ]
+        });
+    };
 
     if (loading) {
         return (
@@ -75,6 +90,15 @@ const UserManagementTable = ({ setStats, searchTerm }) => {
 
     return (
         <div className="overflow-x-auto">
+            <div className="flex justify-end mb-4">
+                <button 
+                  onClick={downloadUsers}
+                  disabled={filteredUsers.length === 0}
+                  className="px-3 py-1 text-xs font-bold uppercase transition-colors rounded-lg bg-green-600/10 text-green-600 hover:bg-green-600 hover:text-white"
+                >
+                    Download User Report (.csv)
+                </button>
+            </div>
             <table className="w-full text-sm">
                 <thead>
                     <tr className={`text-left border-b ${isDarkMode ? "border-gray-700 text-gray-400" : "border-gray-200 text-gray-500"}`}>
@@ -96,23 +120,23 @@ const UserManagementTable = ({ setStats, searchTerm }) => {
                             <td className="py-3 pr-4 capitalize">{user.role}</td>
                             <td className="py-3 pr-4">
                                 <span
-                                    className={`px-2 py-1 rounded-full text-xs font-medium ${user.isSuspended
+                                    className={`px-2 py-1 rounded-full text-xs font-medium ${user.status === "suspended"
                                             ? "bg-red-100 text-red-600"
                                             : "bg-green-100 text-green-600"
                                         }`}
                                 >
-                                    {user.isSuspended ? "Suspended" : "Active"}
+                                    {user.status === "suspended" ? "Suspended" : "Active"}
                                 </span>
                             </td>
                             <td className="py-3">
                                 <button
                                     onClick={() => toggleStatus(user._id)}
-                                    className={`px-3 py-1 rounded text-sm font-medium text-white transition-colors ${user.isSuspended
+                                    className={`px-3 py-1 rounded text-sm font-medium text-white transition-colors ${user.status === "suspended"
                                             ? "bg-green-500 hover:bg-green-600"
                                             : "bg-red-500 hover:bg-red-600"
                                         }`}
                                 >
-                                    {user.isSuspended ? "Unsuspend" : "Suspend"}
+                                    {user.status === "suspended" ? "Unsuspend" : "Suspend"}
                                 </button>
                             </td>
                         </tr>
