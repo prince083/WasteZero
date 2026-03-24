@@ -8,10 +8,16 @@ import opportunityService from '../../services/opportunityService';
 import wasteService from '../../services/wasteService';
 import { exportRowsToCsv } from '../../services/csvExportService';
 
+import adminService from '../../services/adminService';
+
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
 const AdminDashboard = () => {
-    const [opportunities, setOpportunities] = useState([]);
+    const [stats, setStats] = useState({
+        users: { total: 0 },
+        opportunities: { total: 0 },
+        pickups: { total: 0 }
+    });
     const [categoryData, setCategoryData] = useState([]);
     const [trendData, setTrendData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,14 +27,14 @@ const AdminDashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 setLoading(true);
-                const [opps, categories, trends] = await Promise.all([
-                    opportunityService.getAllOpportunities(),
+                const [categories, trends, platformStats] = await Promise.all([
                     wasteService.getStatsByCategory(),
-                    wasteService.getWasteTrends()
+                    wasteService.getWasteTrends(),
+                    adminService.getPlatformStats()
                 ]);
 
-                setOpportunities(opps);
                 setCategoryData(categories);
+                setStats(platformStats);
 
                 // Map months for better display
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -48,16 +54,6 @@ const AdminDashboard = () => {
         fetchDashboardData();
     }, []);
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this opportunity?')) {
-            try {
-                await opportunityService.deleteOpportunity(id);
-                setOpportunities(prev => prev.filter(opp => opp._id !== id));
-            } catch (err) {
-                alert(err.message || 'Failed to delete opportunity');
-            }
-        }
-    };
 
     const downloadWasteReport = () => {
         exportRowsToCsv({
@@ -78,24 +74,35 @@ const AdminDashboard = () => {
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-black mb-8 dark:text-white tracking-tight">Admin Dashboard</h1>
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-black dark:text-white tracking-tight">Admin Overview</h1>
+                <Link 
+                    to="/admin-panel" 
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                >
+                    Open Control Panel 
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </Link>
+            </div>
 
             {/* Top Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
                     <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Users</h3>
-                    <p className="text-4xl font-black text-green-600 dark:text-green-400">1,245</p>
-                    <div className="mt-2 text-xs text-green-500 font-bold">+12% from last month</div>
+                    <p className="text-4xl font-black text-green-600 dark:text-green-400">{stats.users?.total || 0}</p>
+                    <div className="mt-2 text-xs text-green-500 font-bold">Platform wide</div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Pending Approvals</h3>
-                    <p className="text-4xl font-black text-orange-500 dark:text-orange-400">23</p>
-                    <div className="mt-2 text-xs text-orange-400 font-bold">Action required soon</div>
+                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Opportunities</h3>
+                    <p className="text-4xl font-black text-orange-500 dark:text-orange-400">{stats.opportunities?.total || 0}</p>
+                    <div className="mt-2 text-xs text-orange-400 font-bold">Active content</div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
                     <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Pickups</h3>
-                    <p className="text-4xl font-black text-blue-600 dark:text-blue-400">8,902</p>
-                    <div className="mt-2 text-xs text-blue-400 font-bold">98% success rate</div>
+                    <p className="text-4xl font-black text-blue-600 dark:text-blue-400">{stats.pickups?.total || 0}</p>
+                    <div className="mt-2 text-xs text-blue-400 font-bold">Closed requests</div>
                 </div>
             </div>
 
@@ -114,8 +121,8 @@ const AdminDashboard = () => {
                                     outerRadius={80}
                                     fill="#8884d8"
                                     dataKey="totalWeight"
-                                    nameKey="category"
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    nameKey="_id"
+                                    label={({ _id, percent }) => `${_id} ${(percent * 100).toFixed(0)}%`}
                                 >
                                     {categoryData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -151,73 +158,6 @@ const AdminDashboard = () => {
                 >
                     Download Full Waste Report (.csv)
                 </button>
-            </div>
-
-            {/* Opportunity Management Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700 overflow-hidden">
-                <div className="p-6 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
-                    <h2 className="text-xl font-black text-gray-800 dark:text-white uppercase tracking-wider">Manage Opportunities</h2>
-                </div>
-
-                <div className="p-6">
-                    {error ? (
-                        <div className="p-4 bg-red-50 text-red-600 rounded-2xl text-center font-medium">{error}</div>
-                    ) : opportunities.length === 0 ? (
-                        <div className="text-center py-12">
-                            <p className="text-gray-400 italic">No opportunities found.</p>
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead>
-                                    <tr className="text-xs font-black text-gray-400 uppercase tracking-widest border-b dark:border-gray-700">
-                                        <th className="py-4 px-2">Opportunity</th>
-                                        <th className="py-4 px-2 text-center">Status</th>
-                                        <th className="py-4 px-2">Location</th>
-                                        <th className="py-4 px-2 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {opportunities.map((opp) => (
-                                        <tr key={opp._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                                            <td className="py-5 px-2">
-                                                <p className="font-bold text-gray-900 dark:text-white">{opp.title}</p>
-                                                <p className="text-[10px] text-gray-400 uppercase font-black tracking-tight">{opp.ngo_id?.name}</p>
-                                            </td>
-                                            <td className="py-5 px-2 text-center">
-                                                <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${opp.status === 'open' ? 'bg-green-100 text-green-700' :
-                                                    opp.status === 'in-progress' ? 'bg-yellow-100 text-yellow-700' :
-                                                        'bg-gray-100 text-gray-700'
-                                                    }`}>
-                                                    {opp.status}
-                                                </span>
-                                            </td>
-                                            <td className="py-5 px-2 max-w-[200px]">
-                                                <p className="text-xs text-gray-500 dark:text-gray-300 truncate">{opp.address}</p>
-                                            </td>
-                                            <td className="py-5 px-2 text-right">
-                                                <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Link
-                                                        to={`/opportunities/edit/${opp._id}`}
-                                                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
-                                                    >
-                                                        Edit
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => handleDelete(opp._id)}
-                                                        className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
             </div>
         </div>
     );
