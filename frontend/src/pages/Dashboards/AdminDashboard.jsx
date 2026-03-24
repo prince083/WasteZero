@@ -8,11 +8,13 @@ import opportunityService from '../../services/opportunityService';
 import wasteService from '../../services/wasteService';
 import { exportRowsToCsv } from '../../services/csvExportService';
 
+import { useTheme } from '../../context/ThemeContext';
 import adminService from '../../services/adminService';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
 const AdminDashboard = () => {
+    const { isDarkMode } = useTheme();
     const [stats, setStats] = useState({
         users: { total: 0 },
         opportunities: { total: 0 },
@@ -75,10 +77,10 @@ const AdminDashboard = () => {
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-black dark:text-white tracking-tight">Admin Overview</h1>
+                <h1 className="text-2xl font-bold">Admin Overview</h1>
                 <Link 
                     to="/admin-panel" 
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-all shadow-sm flex items-center gap-2"
                 >
                     Open Control Panel 
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,28 +90,28 @@ const AdminDashboard = () => {
             </div>
 
             {/* Top Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Users</h3>
-                    <p className="text-4xl font-black text-green-600 dark:text-green-400">{stats.users?.total || 0}</p>
-                    <div className="mt-2 text-xs text-green-500 font-bold">Platform wide</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className={`p-4 rounded-xl shadow ${isDarkMode ? "bg-[#1e293b]" : "bg-white"}`}>
+                    <p className="text-gray-400 text-sm">Total Users</p>
+                    <h2 className="text-green-400 text-2xl font-bold">{stats.users?.total || 0}</h2>
+                    <div className="mt-1 text-[10px] text-green-500 font-medium">Platform wide</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Opportunities</h3>
-                    <p className="text-4xl font-black text-orange-500 dark:text-orange-400">{stats.opportunities?.total || 0}</p>
-                    <div className="mt-2 text-xs text-orange-400 font-bold">Active content</div>
+                <div className={`p-4 rounded-xl shadow ${isDarkMode ? "bg-[#1e293b]" : "bg-white"}`}>
+                    <p className="text-gray-400 text-sm">Total Opportunities</p>
+                    <h2 className="text-orange-400 text-2xl font-bold">{stats.opportunities?.total || 0}</h2>
+                    <div className="mt-1 text-[10px] text-orange-400 font-medium">Active content</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
-                    <h3 className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Total Pickups</h3>
-                    <p className="text-4xl font-black text-blue-600 dark:text-blue-400">{stats.pickups?.total || 0}</p>
-                    <div className="mt-2 text-xs text-blue-400 font-bold">Closed requests</div>
+                <div className={`p-4 rounded-xl shadow ${isDarkMode ? "bg-[#1e293b]" : "bg-white"}`}>
+                    <p className="text-gray-400 text-sm">Total Pickups</p>
+                    <h2 className="text-blue-400 text-2xl font-bold">{stats.pickups?.total || 0}</h2>
+                    <div className="mt-1 text-[10px] text-blue-400 font-medium">Closed requests</div>
                 </div>
             </div>
 
             {/* Analytics Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
-                    <h2 className="text-xl font-black mb-6 dark:text-white uppercase tracking-wider">Waste by Category (kg)</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div className={`p-6 rounded-xl shadow ${isDarkMode ? "bg-[#1e293b]" : "bg-white"}`}>
+                    <h2 className="text-lg font-bold mb-6 dark:text-white uppercase tracking-wider">Waste by Category (kg)</h2>
                     <div className="h-[300px]" style={{ height: '300px', minHeight: '300px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -135,8 +137,8 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-50 dark:border-gray-700">
-                    <h2 className="text-xl font-black mb-6 dark:text-white uppercase tracking-wider">Collection Trends (kg)</h2>
+                <div className={`p-6 rounded-xl shadow ${isDarkMode ? "bg-[#1e293b]" : "bg-white"}`}>
+                    <h2 className="text-lg font-bold mb-6 dark:text-white uppercase tracking-wider">Collection Trends (kg)</h2>
                     <div className="h-[300px]" style={{ height: '300px', minHeight: '300px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={trendData}>
@@ -151,10 +153,10 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            <div className="flex justify-end mb-8 -mt-4">
+            <div className="flex justify-end mb-8 -mt-2">
                 <button 
                   onClick={downloadWasteReport}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition-all shadow-md flex items-center gap-2"
                 >
                     Download Full Waste Report (.csv)
                 </button>

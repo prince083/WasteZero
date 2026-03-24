@@ -22,7 +22,28 @@ const AdminPanel = () => {
                 try {
                     setLoadingLogs(true);
                     const res = await api.get("/admin/logs");
-                    setLogs(res.data);
+                    
+                    // Transform raw backend logs to readable UI format
+                    const formattedDetails = res.data.map(log => ({
+                        id: log._id,
+                        actor: log.admin_id?.name || "System",
+                        action: formatActionLabel(log.action),
+                        target: log.target_id?.name || log.target_id?.title || "Platform",
+                        createdAt: log.timestamp
+                    }));
+                    
+                    setLogs(formattedDetails);
+
+    // Helper to make raw DB codes look professional
+    function formatActionLabel(action) {
+        const actions = {
+            'SUSPEND_USER': 'User Account Suspended',
+            'UNSUSPEND_USER': 'User Account Activated',
+            'DELETE_OPPORTUNITY': 'Content Removed',
+            'ADMIN_LOGIN': 'Admin Login',
+        };
+        return actions[action] || action.replace(/_/g, ' ').toLowerCase();
+    }
                 } catch (err) {
                     console.error("Failed to fetch logs:", err);
                 } finally {
