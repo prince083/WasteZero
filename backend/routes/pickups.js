@@ -19,11 +19,11 @@ router.post('/', auth, authorizeRoles('volunteer'), createPickup);
 // GET /api/pickups/my — volunteer sees their own pickups
 router.get('/my', auth, authorizeRoles('volunteer'), getMyPickups);
 
-// GET /api/pickups/assigned — NGO sees pickups assigned to them
-router.get('/assigned', auth, authorizeRoles('ngo'), getAssignedPickups);
+// GET /api/pickups/assigned — NGO or Volunteer (Agent) sees pickups assigned to them
+router.get('/assigned', auth, authorizeRoles('ngo', 'volunteer'), getAssignedPickups);
 
-// PATCH /api/pickups/:id/status — NGO/admin updates pickup status
-router.patch('/:id/status', auth, authorizeRoles('ngo', 'admin'), updatePickupStatus);
+// PATCH /api/pickups/:id/status — NGO/Agent/Admin updates pickup status
+router.patch('/:id/status', auth, authorizeRoles('ngo', 'admin', 'volunteer'), updatePickupStatus);
 
 // PATCH /api/pickups/:id/dispatch — NGO dispatches to volunteer staff
 router.patch('/:id/dispatch', auth, authorizeRoles('ngo'), dispatchPickup);

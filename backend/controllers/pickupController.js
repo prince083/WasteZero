@@ -1,6 +1,7 @@
 const Pickup = require('../models/Pickup');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const WasteStats = require('../models/WasteStats');
 
 // ─────────────────────────────────────────────────────────────
 // POST /api/pickups
@@ -122,7 +123,7 @@ const getAssignedPickups = async (req, res, next) => {
 // ─────────────────────────────────────────────────────────────
 const updatePickupStatus = async (req, res, next) => {
     try {
-        const { status } = req.body;
+        const { status, weight } = req.body;
         const pickup = await Pickup.findById(req.params.id);
 
         if (!pickup) {
@@ -138,6 +139,17 @@ const updatePickupStatus = async (req, res, next) => {
 
         pickup.status = status;
         await pickup.save();
+
+        // If completed, create a corresponding WasteStats record for the dashboard
+        if (status === 'completed') {
+            await WasteStats.create({
+                user_id: pickup.user_id,
+                pickup_id: pickup._id,
+                category: pickup.category,
+                weight: weight || 0,
+                date: new Date()
+            });
+        }
 
         // Notify the user about status update
         await Notification.create({

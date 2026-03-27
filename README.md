@@ -1,116 +1,173 @@
 # WasteZero ♻️
+**Smart Waste Management & Recycling Ecosystem**
 
-**Smart Waste Pickup & Recycling Platform**
+WasteZero is a community-driven platform designed to bridge the gap between households, NGOs, and volunteers. By digitizing pickup requests and streamlining recycling efforts, we aim to make high-impact waste management accessible to everyone.
 
-WasteZero connects households, NGOs, and volunteers to promote efficient waste management and recycling.
+[![Node.js](https://img.shields.io/badge/Backend-Node.js-green)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/Frontend-React-blue)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/Database-MongoDB-brightgreen)](https://www.mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Styling-TailwindCSS-38B2AC)](https://tailwindcss.com/)
 
 ---
 
-## 🚀 Quick Start Guide
+## 📑 Table of Contents
+- [Prerequisites](#-prerequisites)
+- [Project Setup](#-project-setup)
+  - [1. Clone Repository](#1-clone-the-repository)
+  - [2. Backend Configuration](#2-backend-setup-server)
+  - [3. Frontend Configuration](#3-frontend-setup-client)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Architecture](#-project-architecture)
+- [Troubleshooting](#-troubleshooting)
+- [Contribution Guide](#-contribution-guide)
 
-### 1️⃣ Clone the Repository
+---
+
+## 📋 Prerequisites
+Before you begin, ensure you have the following installed on your local machine:
+* **Node.js** (v18.x or higher)
+* **npm** (v9.x or higher) or **yarn**
+* **MongoDB Community Server** (Local) or **MongoDB Atlas** (Cloud)
+
+---
+
+## 🚀 Project Setup
+
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/priyaw5/wastezero_project.git
 cd wastezero_project
 ```
 
-### 2️⃣ Backend Setup (Server)
-The backend runs on **Node.js + Express** with **MongoDB**.
+### 2. Backend Setup (Server)
+The backend manages authentication, automated OTPs, and the core recycling logic.
 
-1. Navigate to the `backend` folder:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the `backend/` root directory:
-   ```env
-   # Server Configuration
-   PORT=3000
-   MONGO_URI=your_mongodb_connection_string
+1.  **Navigate to backend**:
+    ```bash
+    cd backend
+    ```
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Environment Variables**: Create a `.env` file in the `backend/` directory:
+    ```env
+    PORT=3000
+    NODE_ENV=development
+    DATABASE_URL=mongodb://127.0.0.1:27017/watezero
+    JWT_SECRET=your_jwt_secret_key
+    
+    # Email Configuration (Nodemailer)
+    EMAIL_USER=your_email@gmail.com
+    EMAIL_PASS=your_app_specific_password
 
-   # Authentication
-   JWT_SECRET=your_super_secret_key_here
-   ADMIN_SECURITY_CODE=your_secret_admin_code_here # Required to register an 'admin' role
+    # Admin Registration Security
+    ADMIN_SECURITY_CODE=your_secret_admin_code
+    ```
+    > **⚠️ Security Tip**: Never commit your `.env` file. It contains sensitive credentials.
 
-   # Email Service (Required for OTP)
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_email_app_password
-
-   # Admin Access
-   ADMIN_SECURITY_CODE=your_secret_admin_code_here # Required to register an 'admin' role
-   ```
-   > **Note:** For Gmail, use an **App Password** if 2-Step Verification is enabled.
-   
-   > **Admin Access:** To register as an Admin, a user must select the 'Admin' role on the registration page and enter the exact `ADMIN_SECURITY_CODE` defined in your `.env` file.
-
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
-   *(Server should run on http://localhost:3000)*
+4.  **Run Server**:
+    ```bash
+    npm run dev
+    ```
+    *The API will be available at `http://localhost:3000`*
 
 ---
 
-### 3️⃣ Frontend Setup (Client)
-The frontend is built with **React + Vite + TailwindCSS**.
+### 3. Frontend Setup (Client)
+The frontend is a modern, responsive Single Page Application (SPA).
 
-1. Open a new terminal and navigate to the `frontend` folder:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-   *(App checks backend at http://localhost:3000/api)*
+1.  **Navigate to frontend**:
+    ```bash
+    cd ../frontend
+    ```
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Launch Dashboard**:
+    ```bash
+    npm run dev
+    ```
+    *The application will open at `http://localhost:5173`*
 
 ---
 
-## 📂 Project Structure
-
-### Backend (`/backend`)
-- **`models/`**: Mongoose schemas (User, PickupRequest).
-- **`controllers/`**: Logic for authentication and features.
-- **`routes/`**: API endpoints (e.g., `/api/auth`, `/api/pickups`).
-- **`middlewares/`**: 
-  - `auth.js`: Verifies JWT tokens.
-  - `role.js`: Checks user roles (Admin, NGO, User).
-  - `validation.js`: Joi validation schemas.
-  - `errorHandler.js`: Centralized error handling.
-- **`utils/`**: Helper functions (Email Service).
-
-### Frontend (`/frontend`)
-- **`src/context/`**:
-  - `AuthContext.jsx`: Manages user login state.
-  - `ThemeContext.jsx`: Handles Dark/Light mode.
-- **`src/services/`**: API calls (Axios setup).
-- **`src/pages/`**:
-  - `Login.jsx` / `Registration.jsx`: Auth pages.
-  - `Dashboards/`: Role-specific dashboards.
-- **`src/components/`**: Reusable UI components (Navbar, Sidebar).
-- **`src/routes/`**: `ProtectedRoute.jsx` for securing pages.
+## ✨ Features
+*   **Role-Based Access Control**: Separate interfaces for Users, NGOs, and Admins.
+*   **Waste Pickups**: Schedule and track waste collections in real-time.
+*   **NGO Opportunities**: Browse and participate in recycling/waste management initiatives.
+*   **Interactive Maps**: Pinpoint pickup locations accurately using OpenStreetMap.
+*   **Admin Dashboard**: Real-time waste analytics and trend visualization using Recharts.
+*   **OTP Authentication**: Secure login and registration via email verification.
+*   **Smart Matching**: Connects users to nearby NGO opportunities based on location.
 
 ---
 
 ## 🛠 Tech Stack
-- **Frontend:** React, Vite, TailwindCSS, React Context API
-- **Backend:** Node.js, Express, MongoDB, Mongoose
-- **Auth:** JWT (JSON Web Tokens), BCrypt, Nodemailer (OTP)
-- **Validation:** Joi
+| Tier | Technology |
+| :--- | :--- |
+| **Frontend** | React (Vite), Tailwind CSS, Framer Motion, Recharts |
+| **Backend** | Node.js, Express.js |
+| **Database** | MongoDB + Mongoose |
+| **Real-time** | Socket.io |
+| **Testing** | Joi (Validation), Postman |
 
-## 🤝 Contribution Workflow
-1. Pull the latest changes: `git pull origin pawnesh-dev`
-2. Create a new branch (Optional): `git checkout -b feature-name`
-3. Commit your changes: `git commit -m "Added feature X"`
-4. Push to GitHub: `git push origin feature-name`
-5. Create a Pull Request (PR) for review.
+---
 
+## 🏗 Project Architecture
 
-Note: here feature name is your branch name
+### Backend Structures
+*   `controllers/`: Request handling logic.
+*   `models/`: Mongoose schemas (User, WasteStats, Pickup, etc.).
+*   `routes/`: API endpoint definitions.
+*   `middlewares/`: `auth.js` (JWT), `role.js` (RBAC), `errorHandler.js`.
+*   `socket/`: Real-time notification logic.
+
+### Frontend Structures
+*   `src/pages/`: Role-specific dashboards and main views.
+*   `src/components/`: Modular UI elements (Navbar, Sidebar, MapPicker).
+*   `src/context/`: `AuthContext` (User State), `ThemeContext` (Dark Mode).
+*   `src/services/`: Centralized Axios API handlers.
+
+---
+
+## 🔍 Troubleshooting
+
+**1. MongoDB Connection Refused**
+*   Ensure your MongoDB service is running (`services.msc` on Windows).
+*   Verify the `DATABASE_URL` in `.env`.
+
+**2. OTP Not Sending**
+*   If using Gmail, ensure you have generated an **App Password**. Regular passwords will not work.
+*   Check if `EMAIL_USER` is correct.
+
+**3. Port 3000 Already in Use**
+*   On Windows: `netstat -ano | findstr :3000` -> `taskkill /F /PID <pid>`.
+*   Or change the `PORT` in `.env`.
+
+**4. Map Not Appearing**
+*   The Map requires a parent container with a defined height. If you are creating new pages, ensure the Leaflet container has style prop `height`.
+
+---
+
+## 🤝 Contribution Guide
+We use a structured branching strategy to keep the codebase clean.
+
+### 🛠 Development Workflow
+1.  **Pull latest changes**: `git pull origin pawnesh-dev`
+2.  **Create a new branch**: `git checkout -b feature-name`
+3.  **Commit your changes**: `git commit -m "Add feature/fix description"`
+4.  **Push to GitHub**: `git push origin feature-name`
+5.  **Create a Pull Request (PR)**: Submit for review on GitHub.
+
+*(Note: 'feature-name' should be replaced with your actual branch name)*
+
+### 💡 Best Practices
+*   **Stay Decoupled**: Work on your respective branch. If you need a backend endpoint that doesn't exist yet, use mock data until the backend is merged.
+*   **Clean Code**: Maintain the established architectural patterns (Controllers/Services).
+*   **Audit**: Run the app locally and check the console for errors before pushing.
+
+---
+*Developed for Milestone 4 - Reporting & Administration*

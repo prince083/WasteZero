@@ -32,9 +32,9 @@ const PickupService = {
     },
 
     // Update pickup status (assigned -> completed/cancelled)
-    updateStatus: async (pickupId, status) => {
+    updateStatus: async (pickupId, status, extraData = {}) => {
         try {
-            const response = await api.patch(`/pickups/${pickupId}/status`, { status });
+            const response = await api.patch(`/pickups/${pickupId}/status`, { status, ...extraData });
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to update status';

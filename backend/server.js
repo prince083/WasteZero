@@ -25,6 +25,8 @@ async function start() {
   app.use('/api/chat', require('./routes/chat'));
   app.use('/api/notifications', require('./routes/notification'));
   app.use('/api/pickups', require('./routes/pickups'));
+  app.use('/api/waste', require('./routes/waste'));
+  app.use('/api/admin', require('./routes/admin'));
 
   app.get('/', (req, res) => {
     res.send('WasteZero Backend is running');
@@ -37,8 +39,9 @@ async function start() {
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-      methods: ['GET', 'POST']
+      origin: [process.env.FRONTEND_URL || 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
+      methods: ['GET', 'POST'],
+      credentials: true
     }
   });
 
@@ -55,6 +58,7 @@ async function start() {
     console.log(`Server running on port ${port}`);
     console.log(`Socket.io ready`);
   });
+
 }
 
 start().catch(err => {

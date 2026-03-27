@@ -288,8 +288,8 @@ const Profile = () => {
                                                         type="button"
                                                         onClick={() => setLocationMode("manual")}
                                                         className={`flex items-center gap-1.5 px-3 py-1.5 transition-colors ${locationMode === "manual"
-                                                                ? "bg-green-600 text-white"
-                                                                : isDarkMode ? "bg-gray-700 text-gray-400 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                            ? "bg-green-600 text-white"
+                                                            : isDarkMode ? "bg-gray-700 text-gray-400 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                                                             }`}
                                                     >
                                                         <FaKeyboard size={11} /> Manual
@@ -298,8 +298,8 @@ const Profile = () => {
                                                         type="button"
                                                         onClick={() => setLocationMode("map")}
                                                         className={`flex items-center gap-1.5 px-3 py-1.5 transition-colors ${locationMode === "map"
-                                                                ? "bg-green-600 text-white"
-                                                                : isDarkMode ? "bg-gray-700 text-gray-400 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                            ? "bg-green-600 text-white"
+                                                            : isDarkMode ? "bg-gray-700 text-gray-400 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                                                             }`}
                                                     >
                                                         <FaMapMarkerAlt size={11} /> Pick on Map
@@ -318,14 +318,13 @@ const Profile = () => {
                                                 />
                                             ) : (
                                                 <div className="space-y-3">
-                                                    <MapPicker
-                                                        onLocationSelect={handleLocationSelect}
-                                                        initialCoordinates={
-                                                            formData.location?.coordinates?.[0] !== 0
-                                                                ? [formData.location.coordinates[1], formData.location.coordinates[0]]
-                                                                : null
-                                                        }
-                                                    />
+                                                    <div className="h-[300px] rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                                        <MapPicker
+                                                            onLocationSelect={handleLocationSelect}
+                                                            initialLat={formData.location?.coordinates?.[1] !== 0 ? formData.location?.coordinates?.[1] : null}
+                                                            initialLng={formData.location?.coordinates?.[0] !== 0 ? formData.location?.coordinates?.[0] : null}
+                                                        />
+                                                    </div>
                                                     {formData.address && (
                                                         <div className={`flex items-start gap-2 p-3 rounded-lg border text-sm ${isDarkMode ? "bg-gray-700 border-gray-600 text-gray-300" : "bg-green-50 border-green-100 text-gray-700"}`}>
                                                             <FaMapMarkerAlt className="text-green-500 mt-0.5 shrink-0" />

@@ -18,6 +18,7 @@ import SchedulePickup from "./pages/Pickups/SchedulePickup";
 import MatchDashboard from "./pages/Matches/MatchDashboard";
 import VolunteerTasks from "./pages/Pickups/VolunteerTasks";
 import ChatLayout from "./pages/Chat/ChatLayout";
+import AdminPanel from "./pages/Admin/AdminPanel";
 
 function App() {
   return (
@@ -50,14 +51,10 @@ function App() {
 
               {/* Match Dashboard Route */}
               <Route path="/matches" element={<MatchDashboard />} />
-            </Route>
 
-            {/* Example of Role-Based Route (Future usage) */}
-            {/*
-            <Route element={<ProtectedRoute roles={['admin']} />}>
-                <Route path="/admin" element={<AdminPanel />} />
+              {/* Admin Panel Route */}
+              <Route path="/admin-panel" element={<AdminPanel />} />
             </Route>
-            */}
           </Routes>
         </AuthProvider>
       </ThemeProvider>

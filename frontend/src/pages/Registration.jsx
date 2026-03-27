@@ -301,11 +301,13 @@ function Register() {
             {locationMode === "map" && (
               <div style={{ marginTop: "10px", marginBottom: "15px", pointerEvents: isFormDisabled ? "none" : "auto", opacity: isFormDisabled ? 0.6 : 1 }}>
                 <p style={{ fontSize: "12px", color: "gray", marginBottom: "10px" }}>Click on the map to pin your location. The address will fill automatically.</p>
-                <MapPicker
-                  onLocationSelect={handleLocationSelect}
-                  initialLat={formData.latitude}
-                  initialLng={formData.longitude}
-                />
+                <div style={{ height: "300px", borderRadius: "8px", overflow: "hidden", border: "1px solid #ddd" }}>
+                  <MapPicker
+                    onLocationSelect={handleLocationSelect}
+                    initialLat={formData.latitude}
+                    initialLng={formData.longitude}
+                  />
+                </div>
               </div>
             )}
           </div>

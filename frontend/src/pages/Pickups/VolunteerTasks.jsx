@@ -24,8 +24,19 @@ const VolunteerTasks = () => {
     }, []);
 
     const handleUpdateStatus = async (taskId, status) => {
+        let weight = 0;
+        if (status === 'completed') {
+            const result = prompt('Enter the amount of waste collected (in kg):', '5');
+            if (result === null) return; // cancel
+            weight = parseFloat(result);
+            if (isNaN(weight)) {
+                alert('Please enter a valid number for waste weight.');
+                return;
+            }
+        }
+
         try {
-            await pickupService.updateStatus(taskId, status);
+            await pickupService.updateStatus(taskId, status, { weight });
             setTasks(prev => prev.map(t => t._id === taskId ? { ...t, status } : t));
         } catch (err) {
             alert(err);
