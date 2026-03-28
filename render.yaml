@@ -3,7 +3,6 @@ services:
   - type: web
     name: wastezero-backend
     env: node
-    plan: free
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
@@ -27,7 +26,6 @@ services:
   - type: web
     name: wastezero-frontend
     runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
