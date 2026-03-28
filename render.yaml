@@ -14,19 +14,16 @@ services:
         sync: false
       - key: NODE_ENV
         value: production
-      - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: wastezero-frontend
-          property: url
-      - key: EMAIL_USER # Optional
+      - key: FRONTEND_URL # Set this to your frontend URL after deployment
         sync: false
-      - key: EMAIL_PASS # Optional
+      - key: EMAIL_USER 
         sync: false
-      - key: ADMIN_SECURITY_CODE # Required if using admin dashboard
+      - key: EMAIL_PASS 
+        sync: false
+      - key: ADMIN_SECURITY_CODE 
         sync: false
 
-  # Frontend Static Site (Using runtime: static as per Render Blueprints)
+  # Frontend Static Site
   - type: web
     name: wastezero-frontend
     runtime: static
@@ -39,8 +36,5 @@ services:
         source: /*
         destination: /index.html
     envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: wastezero-backend
-          property: url
+      - key: VITE_API_URL # Set this to your backend URL after deployment
+        sync: false
