@@ -3,7 +3,7 @@ services:
   - type: web
     name: wastezero-backend
     env: node
-    plan: free # Change to starter/standard for production
+    plan: free
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
@@ -16,7 +16,7 @@ services:
         value: production
       - key: FRONTEND_URL
         fromService:
-          type: static
+          type: web
           name: wastezero-frontend
           property: url
       - key: EMAIL_USER # Optional
@@ -26,14 +26,14 @@ services:
       - key: ADMIN_SECURITY_CODE # Required if using admin dashboard
         sync: false
 
-  # Frontend Static Site
-  - type: static_site
+  # Frontend Static Site (Using runtime: static as per Render Blueprints)
+  - type: web
     name: wastezero-frontend
-    env: static
+    runtime: static
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: dist
     routes:
       - type: rewrite
         source: /*
