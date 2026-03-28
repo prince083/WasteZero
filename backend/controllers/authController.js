@@ -45,8 +45,7 @@ async function register(req, res) {
       await sendVerificationEmail(email, otp, 'Your Registration OTP');
       return res.status(200).json({ message: 'OTP sent to your email. Please verify to complete registration.', email: email });
     } catch (emailError) {
-      // If email fails, user exists but can't verify. Maybe delete user or just return error?
-      // For simplicity, returning error but user is created. They can try login (which will resend OTP).
+      console.error("Email sending failed:", emailError);
       return res.status(500).json({ message: 'Registration successful but failed to send OTP email.' });
     }
 
@@ -73,11 +72,13 @@ async function login(req, res) {
     user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
     await user.save();
 
+    console.log(`[DEBUG] Attempting to send OTP email to: [${email}]`);
     try {
       await sendVerificationEmail(email, otp, 'Your Login OTP');
 
       return res.status(200).json({ message: 'OTP sent to your email.', email: email });
     } catch (emailError) {
+      console.error("Email sending failed:", emailError);
       return res.status(500).json({ message: 'Failed to send OTP email.' });
     }
 

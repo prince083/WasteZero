@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaLock, FaMapMarkerAlt, FaShieldAlt, FaBriefcase, FaAlignLeft, FaUsers } from "react-icons/fa";
 import MapPicker from "../components/MapPicker";
 import { useAuth } from "../context/AuthContext";
-
+import AuthLayout from "../components/AuthLayout";
 import AuthService from "../services/authService";
 
 function Register() {
@@ -80,7 +80,6 @@ function Register() {
     }
 
     if (showOtpInput) {
-      // Verify OTP logic
       try {
         await verifyOtp({
           email: formData.email,
@@ -98,7 +97,6 @@ function Register() {
         return;
       }
 
-      // Register and Send OTP logic
       const submissionData = {
         ...formData,
         skills: formData.skills.split(",").map((s) => s.trim()).filter(Boolean),
@@ -126,219 +124,262 @@ function Register() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="form-box register-box">
-        <h2>WasteZero Registration</h2>
+    <AuthLayout
+      title="Create a new account"
+      subtitle="Fill in your details to join the WasteZero community."
+    >
+      <div className="flex bg-[#F2F4F3] p-1 rounded-2xl mb-8">
+        <Link to="/" className="w-1/2 py-2.5 text-sm font-bold text-secondary text-center">
+          Login
+        </Link>
+        <button className="w-1/2 py-2.5 text-sm font-bold rounded-xl glass-card text-primary shadow-sm">
+          Register
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="register-form">
-          <input
-            type="text"
-            name="name"
-            placeholder="Full Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            disabled={isFormDisabled}
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            disabled={isFormDisabled}
-          />
-
-          <div className="password-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={isFormDisabled}
-            />
-            <span
-              onClick={() => setShowPassword(!showPassword)}
-              className="password-toggle"
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </div>
-
-          <div className="password-wrapper" style={{ marginTop: "10px", marginBottom: "15px" }}>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              disabled={isFormDisabled}
-            />
-          </div>
-
-          <select name="role" value={formData.role} onChange={handleChange} required>
-            <option value="">Select Role</option>
-            <option value="volunteer">Volunteer</option>
-            <option value="ngo">NGO</option>
-            <option value="admin">Admin</option>
-          </select>
-
-          {formData.role === "admin" && (
-            <div style={{ display: 'flex', flexDirection: 'column', marginTop: '10px', marginBottom: '15px' }}>
-              <input
-                type="password"
-                name="securityCode"
-                placeholder="Enter Admin Security Code"
-                value={formData.securityCode}
-                onChange={handleChange}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleVerifySecurityCode())}
-                required
-                disabled={isAdminVerified}
-                style={{ width: '100%', marginBottom: '10px' }}
-              />
-              {!isAdminVerified && (
-                <button
-                  type="button"
-                  onClick={handleVerifySecurityCode}
-                  disabled={isVerifyingCode}
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    backgroundColor: "#4CAF50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontWeight: "bold"
-                  }}
-                >
-                  {isVerifyingCode ? "..." : "Verify"}
-                </button>
-              )}
-            </div>
-          )}
-
-          <input
-            type="text"
-            name="skills"
-            placeholder="Skills (comma separated)"
-            value={formData.skills}
-            onChange={handleChange}
-            disabled={isFormDisabled}
-          />
-
-          <textarea
-            name="bio"
-            placeholder="Short Bio"
-            value={formData.bio}
-            onChange={handleChange}
-            rows="2"
-            disabled={isFormDisabled}
-            style={{
-              padding: "8px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              width: "100%",
-              opacity: isFormDisabled ? 0.6 : 1
-            }}
-          ></textarea>
-
-          <div className="full-width" style={{ marginBottom: "15px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5px" }}>
-              <label style={{ margin: 0, fontWeight: "bold" }}>Address Details:</label>
-              <div style={{ display: "flex", gap: "5px" }}>
-                <button
-                  type="button"
-                  onClick={() => setLocationMode("manual")}
-                  disabled={isFormDisabled}
-                  style={{
-                    padding: "4px 10px",
-                    fontSize: "12px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                    backgroundColor: locationMode === "manual" ? "#4CAF50" : "#f1f1f1",
-                    color: locationMode === "manual" ? "white" : "black",
-                    cursor: isFormDisabled ? "not-allowed" : "pointer"
-                  }}
-                >
-                  Type Manual
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLocationMode("map")}
-                  disabled={isFormDisabled}
-                  style={{
-                    padding: "4px 10px",
-                    fontSize: "12px",
-                    borderRadius: "4px",
-                    border: "1px solid #ccc",
-                    backgroundColor: locationMode === "map" ? "#4CAF50" : "#f1f1f1",
-                    color: locationMode === "map" ? "white" : "black",
-                    cursor: isFormDisabled ? "not-allowed" : "pointer"
-                  }}
-                >
-                  Pick on Map
-                </button>
-              </div>
-            </div>
-
-            <input
-              type="text"
-              name="address"
-              placeholder={locationMode === "map" ? "Pin location on map or edit here" : "Enter your Full Address"}
-              value={formData.address}
-              onChange={handleChange}
-              required
-              disabled={isFormDisabled}
-              style={{ marginTop: "10px", marginBottom: "15px" }}
-            />
-
-            {locationMode === "map" && (
-              <div style={{ marginTop: "10px", marginBottom: "15px", pointerEvents: isFormDisabled ? "none" : "auto", opacity: isFormDisabled ? 0.6 : 1 }}>
-                <p style={{ fontSize: "12px", color: "gray", marginBottom: "10px" }}>Click on the map to pin your location. The address will fill automatically.</p>
-                <div style={{ height: "300px", borderRadius: "8px", overflow: "hidden", border: "1px solid #ddd" }}>
-                  <MapPicker
-                    onLocationSelect={handleLocationSelect}
-                    initialLat={formData.latitude}
-                    initialLng={formData.longitude}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {!showOtpInput ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="group">
+                <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-[#414844] mb-1.5 ml-1">Full Name</label>
+                <div className="relative">
+                  <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    disabled={isFormDisabled}
+                    className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm"
                   />
                 </div>
               </div>
-            )}
-          </div>
-
-          {showOtpInput && (
-            <div className="full-width">
-              <label style={{ display: "block", marginBottom: "5px", color: "green", fontWeight: "bold" }}>
-                OTP Sent to email! Enter code below:
-              </label>
-              <input
-                type="text"
-                name="otp"
-                placeholder="Enter 6-digit OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                required
-              />
+              <div className="group">
+                <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-[#414844] mb-1.5 ml-1">Email</label>
+                <div className="relative">
+                  <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="john@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    disabled={isFormDisabled}
+                    className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm"
+                  />
+                </div>
+              </div>
             </div>
-          )}
 
-          <button type="submit" className="full-width">
-            {showOtpInput ? "Verify & Register" : "Register"}
-          </button>
-        </form>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="group">
+                <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-secondary mb-1.5 ml-1">Password</label>
+                <div className="relative">
+                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    disabled={isFormDisabled}
+                    className="w-full pl-10 pr-10 py-3 input-glass rounded-xl transition-all font-inter text-sm"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary">
+                    {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+                  </button>
+                </div>
+              </div>
+              <div className="group">
+                <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-secondary mb-1.5 ml-1">Confirm</label>
+                <div className="relative">
+                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    disabled={isFormDisabled}
+                    className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm"
+                  />
+                </div>
+              </div>
+            </div>
 
-        <p className="toggle">
-          Already have an account? <Link to="/">Login</Link>
+            <div className="group">
+              <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-secondary mb-1.5 ml-1">I am a...</label>
+              <div className="relative">
+                <FaUsers className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                <select 
+                  name="role" 
+                  value={formData.role} 
+                  onChange={handleChange} 
+                  required
+                  className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm appearance-none cursor-pointer"
+                >
+                  <option value="">Select Role</option>
+                  <option value="volunteer">Volunteer</option>
+                  <option value="ngo">NGO</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+
+            {formData.role === "admin" && (
+              <div className="group animate-in fade-in slide-in-from-left-4 duration-300">
+                <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-secondary mb-1.5 ml-1">Admin Authorization</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <FaShieldAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                    <input
+                      type="password"
+                      name="securityCode"
+                      placeholder="Security Code"
+                      value={formData.securityCode}
+                      onChange={handleChange}
+                      disabled={isAdminVerified}
+                      className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm"
+                    />
+                  </div>
+                  {!isAdminVerified && (
+                    <button
+                      type="button"
+                      onClick={handleVerifySecurityCode}
+                      disabled={isVerifyingCode}
+                      className="px-6 py-3 mint-btn rounded-xl text-xs font-bold whitespace-nowrap"
+                    >
+                      {isVerifyingCode ? "..." : "Verify"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="group">
+              <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-secondary mb-1.5 ml-1">Skills</label>
+              <div className="relative">
+                <FaBriefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                <input
+                  type="text"
+                  name="skills"
+                  placeholder="e.g. Recycling, Logistics, Teaching"
+                  value={formData.skills}
+                  onChange={handleChange}
+                  disabled={isFormDisabled}
+                  className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="group">
+              <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-secondary mb-1.5 ml-1">Bio</label>
+              <div className="relative">
+                <FaAlignLeft className="absolute left-4 top-4 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                <textarea
+                  name="bio"
+                  placeholder="A bit about yourself..."
+                  value={formData.bio}
+                  onChange={handleChange}
+                  rows="2"
+                  disabled={isFormDisabled}
+                  className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="group">
+              <div className="flex justify-between items-center mb-1.5 px-1">
+                <label className="block text-[10px] font-bold font-manrope uppercase tracking-widest text-secondary">Location</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setLocationMode("manual")}
+                    className={`text-[9px] px-2 py-1 rounded-md font-bold uppercase tracking-wider transition-all ${locationMode === "manual" ? "bg-primary text-white" : "bg-secondary/10 text-secondary"}`}
+                  >
+                    Manual
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLocationMode("map")}
+                    className={`text-[9px] px-2 py-1 rounded-md font-bold uppercase tracking-wider transition-all ${locationMode === "map" ? "bg-primary text-white" : "bg-secondary/10 text-secondary"}`}
+                  >
+                    Map Picker
+                  </button>
+                </div>
+              </div>
+              <div className="relative">
+                <FaMapMarkerAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:text-mint transition-colors text-xs" />
+                <input
+                  type="text"
+                  name="address"
+                  placeholder={locationMode === "map" ? "Select on map below" : "Enter full address"}
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  disabled={isFormDisabled}
+                  className="w-full pl-10 pr-4 py-3 input-glass rounded-xl transition-all font-inter text-sm"
+                />
+              </div>
+
+              {locationMode === "map" && !isFormDisabled && (
+                <div className="mt-4 p-1 glass-card rounded-2xl overflow-hidden border border-mint/20">
+                  <div className="h-48 rounded-xl overflow-hidden">
+                    <MapPicker
+                      onLocationSelect={handleLocationSelect}
+                      initialLat={formData.latitude}
+                      initialLng={formData.longitude}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="animate-in fade-in zoom-in duration-500">
+             <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl mb-8 text-center">
+              <div className="w-12 h-12 bg-mint rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaEnvelope className="text-primary text-xl" />
+              </div>
+              <h3 className="text-xl font-bold text-primary mb-2 font-manrope">Check your email</h3>
+              <p className="text-emerald-700 text-sm font-medium">We've sent a security code to {formData.email}</p>
+            </div>
+            <input
+              type="text"
+              name="otp"
+              placeholder="0 0 0 0 0 0"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+              className="w-full text-center text-3xl tracking-[1rem] py-6 input-glass rounded-2xl font-manrope font-extrabold text-primary"
+            />
+          </div>
+        )}
+
+        <button
+          type="submit"
+          className="w-full py-5 mint-btn rounded-2xl text-lg font-extrabold tracking-tight"
+        >
+          {showOtpInput ? "Verify & Create Account" : "Join the Ecosystem"}
+        </button>
+      </form>
+
+      <div className="mt-8 pt-6 border-t border-black/[0.03] text-center">
+        <p className="text-secondary text-sm font-medium">
+          Already a member?{" "}
+          <Link to="/" className="text-primary font-bold hover:underline">
+            Sign In
+          </Link>
         </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 
-export default Register
+export default Register;

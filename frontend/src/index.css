@@ -3,30 +3,68 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #1f2937;
-  background-color: #f3f4f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --primary: #012d1d;
+  --primary-container: #1b4332;
+  --secondary: #4c6452;
+  --tertiary: #002d1c;
+  --mint: #a0f4c8;
+  --background: #f8faf9;
+  --surface: rgba(255, 255, 255, 0.7);
+  --manrope: 'Manrope', sans-serif;
+  --inter: 'Inter', sans-serif;
 }
 
-a {
-  font-weight: 500;
-  color: #2563eb;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #1d4ed8;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: var(--inter);
+  background-color: var(--background);
+  color: var(--primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--manrope);
+}
+
+.eco-gradient {
+  background: linear-gradient(135deg, #012d1d 0%, #1b4332 50%, #40916c 100%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(1, 45, 29, 0.1);
+}
+
+.mint-btn {
+  background: linear-gradient(135deg, #74c69d 0%, #52b788 100%);
+  color: #012d1d;
+  font-family: var(--manrope);
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mint-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(116, 198, 157, 0.4);
+}
+
+.input-glass {
+  background: rgba(236, 238, 237, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.input-glass:focus {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--mint);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(160, 244, 200, 0.3);
 }

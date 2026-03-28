@@ -20,8 +20,8 @@ async function sendVerificationEmail(email, otp, subject) {
 
         console.log(`Email sent to ${email}`);
     } catch (error) {
-        console.error("Error sending email:", error);
-        throw new Error("Email could not be sent");
+        console.error("Nodemailer Error Details:", error.message, error.stack);
+        throw new Error("Email could not be sent: " + error.message);
     }
 }
 
