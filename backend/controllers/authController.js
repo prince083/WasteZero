@@ -13,7 +13,7 @@ async function register(req, res) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    
+
     if (role === 'admin') {
       if (!securityCode || securityCode !== process.env.ADMIN_SECURITY_CODE) {
         return res.status(403).json({ message: "Security code didn't match. You can't register as admin." });
@@ -72,7 +72,6 @@ async function login(req, res) {
     user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
     await user.save();
 
-    console.log(`[DEBUG] Attempting to send OTP email to: [${email}]`);
     try {
       await sendVerificationEmail(email, otp, 'Your Login OTP');
 
