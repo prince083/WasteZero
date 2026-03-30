@@ -11,6 +11,7 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false
     },
+    family: 4, // Forces IPv4 to avoid ENETUNREACH issues on cloud servers
     connectionTimeout: 10000, // 10 seconds
 });
 
