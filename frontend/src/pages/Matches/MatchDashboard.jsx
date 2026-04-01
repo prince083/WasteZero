@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { FaMapMarkerAlt, FaCheckCircle, FaStar } from "react-icons/fa";
@@ -13,10 +13,7 @@ const MatchDashboard = () => {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:3000/api/matches", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get("/matches");
 
         if (res.data.success) {
           setMatches(res.data.data);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 import { FaCheckCircle, FaMapMarkerAlt, FaStar, FaHistory, FaClock } from 'react-icons/fa';
 import { useTheme } from '../../context/ThemeContext';
 import opportunityService from '../../services/opportunityService';
@@ -16,13 +16,9 @@ const VolunteerDashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const token = localStorage.getItem('token');
-
                 // Fetch matches and applications in parallel
                 const [matchRes, appsData] = await Promise.all([
-                    axios.get('http://localhost:3000/api/matches', {
-                        headers: { Authorization: `Bearer ${token}` }
-                    }),
+                    api.get('/matches'),
                     opportunityService.getAppliedOpportunities()
                 ]);
 

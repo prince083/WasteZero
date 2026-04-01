@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import axios from 'axios';
+import api from '../../services/api';
 import { initiateSocketConnection } from '../../services/socketService';
 
 const createMockConversations = (user) => {
@@ -59,12 +59,8 @@ const ChatList = ({ selectedRoomId, onSelectRoom }) => {
                 setLoading(true);
                 setError(null);
 
-                const token = localStorage.getItem('token');
-
                 // Load real conversations from backend. Falls back to mock data on failure.
-                const response = await axios.get('http://localhost:3000/api/chat/conversations/list', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await api.get('/chat/conversations/list');
 
                 if (!isMounted) return;
 

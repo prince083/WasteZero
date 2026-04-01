@@ -5,6 +5,7 @@ import { FaBell, FaInfoCircle, FaRegCheckCircle } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { initiateSocketConnection } from "../services/socketService";
+import api from "../services/api";
 
 const NotificationBell = () => {
   const [open, setOpen] = useState(false);
@@ -29,10 +30,7 @@ const NotificationBell = () => {
     if (!user) return;
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:3000/api/notifications", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get("/notifications");
         if (res.data?.success) {
           setNotifications(res.data.data);
         }
@@ -61,10 +59,7 @@ const NotificationBell = () => {
 
   const markAsRead = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.patch(`http://localhost:3000/api/notifications/${id}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/notifications/${id}/read`);
       // Filter out the notification to simulate it being "read" and removed from the bell tray
       setNotifications((prev) => prev.filter(n => n._id !== id));
     } catch (err) {
