@@ -43,7 +43,8 @@ const opportunitySchema = Joi.object({
         type: Joi.string().valid('Point'),
         coordinates: Joi.array().items(Joi.number()).length(2)
     }).optional(),
-    status: Joi.string().valid('open', 'closed', 'in-progress').optional()
+    status: Joi.string().valid('open', 'closed', 'in-progress').optional(),
+    image: Joi.string().optional()
 });
 const notificationIdSchema = Joi.object({
     id: Joi.string()

@@ -3,7 +3,20 @@ const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const createOpportunity = async (req, res, next) => {
     try {
-        const { title, description, required_skills, duration, location, address, status } = req.body;
+        let { title, description, required_skills, duration, location, address, status } = req.body;
+
+        // Parse JSON strings from FormData
+        if (typeof required_skills === 'string') {
+            try { required_skills = JSON.parse(required_skills); } catch (e) { required_skills = required_skills.split(','); }
+        }
+        if (typeof location === 'string') {
+            try { location = JSON.parse(location); } catch (e) {}
+        }
+
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = req.file.path;
+        }
 
         const opportunity = await Opportunity.create({
             ngo_id: req.user.id,
@@ -13,7 +26,8 @@ const createOpportunity = async (req, res, next) => {
             duration,
             location,
             address,
-            status
+            status,
+            image: imageUrl
         });
 
         res.status(201).json({
@@ -92,7 +106,21 @@ const updateOpportunity = async (req, res, next) => {
             return res.status(403).json({ success: false, message: "Not authorized" });
         }
 
-        opportunity = await Opportunity.findByIdAndUpdate(req.params.id, req.body, {
+        let updateData = { ...req.body };
+
+        // Parse JSON strings from FormData
+        if (typeof updateData.required_skills === 'string') {
+            try { updateData.required_skills = JSON.parse(updateData.required_skills); } catch (e) { updateData.required_skills = updateData.required_skills.split(','); }
+        }
+        if (typeof updateData.location === 'string') {
+            try { updateData.location = JSON.parse(updateData.location); } catch (e) {}
+        }
+
+        if (req.file) {
+            updateData.image = req.file.path;
+        }
+
+        opportunity = await Opportunity.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

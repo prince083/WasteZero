@@ -160,6 +160,13 @@ const OpportunityDetail = () => {
                             {/* Left Column (Main Info) */}
                             <div className="lg:col-span-2 space-y-6">
 
+                                {/* Image Display */}
+                                {opportunity.image && (
+                                    <div className={`rounded-2xl border shadow-sm overflow-hidden ${isDarkMode ? 'border-gray-700' : 'border-gray-100'}`}>
+                                        <img src={opportunity.image} alt={opportunity.title} className="w-full h-auto max-h-[400px] object-cover" />
+                                    </div>
+                                )}
+
                                 {/* Description Box */}
                                 <div className={`p-6 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
                                     <h2 className="text-xl font-bold mb-4 text-left">Description</h2>

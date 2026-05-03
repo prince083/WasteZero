@@ -24,6 +24,12 @@ services:
         sync: false
       - key: SENDGRID_API_KEY # SendGrid transactional email API key
         sync: false
+      - key: CLOUDINARY_NAME
+        sync: false
+      - key: CLOUDINARY_APIKEY
+        sync: false
+      - key: CLOUDINARY_SECRET
+        sync: false
 
   # Frontend Static Site
   - type: web

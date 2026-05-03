@@ -67,6 +67,11 @@ The backend manages authentication, automated OTPs, and the core recycling logic
 
     # Admin Registration Security
     ADMIN_SECURITY_CODE=your_secret_admin_code
+
+    # Cloudinary Integration (Image Uploads)
+    CLOUDINARY_NAME=your_cloud_name
+    CLOUDINARY_APIKEY=your_api_key
+    CLOUDINARY_SECRET=your_api_secret
     ```
     > **⚠️ Security Tip**: Never commit your `.env` file. It contains sensitive credentials.
 
@@ -116,6 +121,7 @@ The frontend is a modern, responsive Single Page Application (SPA).
 | **Backend** | Node.js, Express.js |
 | **Database** | MongoDB + Mongoose |
 | **Real-time** | Socket.io |
+| **Cloud Storage** | Cloudinary (Image Uploads) |
 | **Testing** | Joi (Validation), Postman |
 
 ---

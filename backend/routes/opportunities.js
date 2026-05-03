@@ -3,6 +3,8 @@ const router = express.Router();
 const auth = require('../middlewares/auth');
 const authorizeRoles = require('../middlewares/role');
 const { validate, opportunitySchema } = require('../middlewares/validation');
+const parseFormData = require('../middlewares/parseFormData');
+const upload = require('../config/cloudinary');
 const {
     createOpportunity,
     getOpportunities,
@@ -27,6 +29,8 @@ router.use(auth);
 router.post(
     '/',
     authorizeRoles('ngo', 'admin'),
+    upload.single('image'),
+    parseFormData,
     validate(opportunitySchema),
     createOpportunity
 );
@@ -77,6 +81,8 @@ router.get('/:id', getOpportunityById);
 router.put(
     '/:id',
     authorizeRoles('ngo', 'admin'),
+    upload.single('image'),
+    parseFormData,
     updateOpportunity
 );
 

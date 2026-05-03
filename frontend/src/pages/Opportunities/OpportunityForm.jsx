@@ -6,7 +6,7 @@ import opportunityService from '../../services/opportunityService';
 import Sidebar from '../../components/Sidebar';
 import Navbar from '../../components/Navbar';
 import MapPicker from '../../components/MapPicker';
-
+import useFileUpload from '../../hooks/useFileUpload';
 import { forwardGeocode } from '../../services/geocodingService';
 
 const OpportunityForm = () => {
@@ -21,6 +21,7 @@ const OpportunityForm = () => {
     const [error, setError] = useState(null);
     const [skillInput, setSkillInput] = useState('');
     const [locationMode, setLocationMode] = useState('manual');
+    const { file: imageFile, preview: imagePreview, error: imageError, handleFileChange, setPreview } = useFileUpload();
 
     const [formData, setFormData] = useState({
         title: '',
@@ -51,6 +52,9 @@ const OpportunityForm = () => {
                         status: data.status || 'open',
                         location: data.location || { type: 'Point', coordinates: [0, 0] }
                     });
+                    if (data.image) {
+                        setPreview(data.image);
+                    }
                 } catch (err) {
                     setError(err.message || 'Failed to fetch opportunity details');
                 } finally {
@@ -132,10 +136,27 @@ const OpportunityForm = () => {
                 }
             }
 
+            // Convert to FormData
+            const finalFormData = new FormData();
+            finalFormData.append("title", submissionPayload.title);
+            finalFormData.append("description", submissionPayload.description);
+            finalFormData.append("duration", submissionPayload.duration);
+            if (submissionPayload.date) finalFormData.append("date", submissionPayload.date);
+            finalFormData.append("address", submissionPayload.address);
+            finalFormData.append("status", submissionPayload.status);
+            
+            // Send arrays and objects as JSON strings
+            finalFormData.append("required_skills", JSON.stringify(submissionPayload.required_skills));
+            finalFormData.append("location", JSON.stringify(submissionPayload.location));
+
+            if (imageFile) {
+                finalFormData.append("image", imageFile);
+            }
+
             if (isEditMode) {
-                await opportunityService.updateOpportunity(id, submissionPayload);
+                await opportunityService.updateOpportunity(id, finalFormData);
             } else {
-                await opportunityService.createOpportunity(submissionPayload);
+                await opportunityService.createOpportunity(finalFormData);
             }
             navigate('/opportunities');
         } catch (err) {
@@ -189,6 +210,32 @@ const OpportunityForm = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Left Column */}
                                     <div className="space-y-6">
+                                        {/* Image Upload */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Opportunity Image (Optional)</label>
+                                            <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-xl ${isDarkMode ? 'border-gray-600 bg-gray-700/50' : 'border-gray-300 bg-gray-50'}`}>
+                                                <div className="space-y-1 text-center w-full">
+                                                    {imagePreview ? (
+                                                        <div className="mb-4 relative">
+                                                            <img src={imagePreview} alt="Preview" className="mx-auto h-32 object-contain rounded-md" />
+                                                        </div>
+                                                    ) : (
+                                                        <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    )}
+                                                    <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
+                                                        <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
+                                                            <span>{imagePreview ? 'Change image' : 'Upload a file'}</span>
+                                                            <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
+                                                        </label>
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG up to 5MB</p>
+                                                </div>
+                                            </div>
+                                            {imageError && <p className="mt-2 text-sm text-red-600">{imageError}</p>}
+                                        </div>
+
                                         <div>
                                             <label className="block text-sm font-medium mb-2">Opportunity Title</label>
                                             <input

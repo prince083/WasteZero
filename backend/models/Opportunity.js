@@ -45,6 +45,10 @@ const OpportunitySchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    image: {
+        type: String,
+        default: null
+    },
     status: {
         type: String,
         enum: ["open", "closed", "in-progress"],
